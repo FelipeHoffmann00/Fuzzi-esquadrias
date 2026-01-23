@@ -40,13 +40,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, theme, onEdit, onDel
           }}
         />
         
-        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-          <div className="bg-white text-fuzzi-gray px-4 py-2 rounded-full font-bold flex items-center gap-2 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-            <Maximize2 className="w-4 h-4 text-fuzzi-blue" /> Ver Detalhes
+        {/* Overlay "Ver Detalhes" - Visível por padrão no Mobile, Hover no Desktop */}
+        <div className="absolute inset-0 bg-black/40 lg:bg-black/60 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+          <div className="bg-white/90 backdrop-blur-sm text-fuzzi-gray px-4 py-2 rounded-full font-bold flex items-center gap-2 transform lg:translate-y-4 lg:group-hover:translate-y-0 transition-transform duration-300 shadow-lg scale-90 lg:scale-100">
+            <Maximize2 className="w-4 h-4 text-fuzzi-blue" /> <span className="text-xs lg:text-sm">Ver Detalhes</span>
           </div>
         </div>
 
-        <div className="absolute top-4 left-4 flex flex-col gap-2">
+        <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
           {product.featured && (
             <span className="bg-amber-500 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1 w-fit">
               <Star className="w-3 h-3 fill-current" /> Destaque
@@ -55,7 +56,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, theme, onEdit, onDel
         </div>
 
         {isAdmin && (
-          <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+          <div className="absolute top-4 right-4 flex gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300 z-10">
             <button 
               onClick={(e) => { e.stopPropagation(); onEdit(product); }}
               className="p-2 rounded-xl bg-white/90 text-fuzzi-blue hover:bg-fuzzi-blue hover:text-white transition-colors duration-200 shadow-md"

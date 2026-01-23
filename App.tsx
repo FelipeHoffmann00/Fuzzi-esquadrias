@@ -12,7 +12,7 @@ import Features from './components/Features';
 import ProductDetail from './components/ProductDetail'; 
 import ProductCard from './components/ProductCard'; 
 import WhatsAppIcon from './components/WhatsAppIcon';
-import ConfirmModal from './components/ConfirmModal'; // Importado
+import ConfirmModal from './components/ConfirmModal'; 
 import { FileText, ExternalLink } from 'lucide-react';
 
 const DEFAULT_HERO_IMAGE = "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1200";
@@ -95,16 +95,14 @@ const App: React.FC = () => {
     if (isAdminAuthenticated) {
       setIsAdminAuthenticated(false);
       localStorage.removeItem('fuzzi_admin_auth');
-      setIsLoginOpen(false);
-    } else {
-      setIsLoginOpen(!isLoginOpen);
     }
   };
 
-  const onLoginSuccess = () => {
-    setIsAdminAuthenticated(true);
-    localStorage.setItem('fuzzi_admin_auth', 'true');
-    setIsLoginOpen(false);
+  const onLoginSuccess = (password: string) => {
+    if (password === '123') {
+      setIsAdminAuthenticated(true);
+      localStorage.setItem('fuzzi_admin_auth', 'true');
+    }
   };
 
   const handleSaveProduct = (product: Product) => {
@@ -127,12 +125,10 @@ const App: React.FC = () => {
     setIsEditing(false);
   };
 
-  // Solicita a exclusão do produto (abre modal)
   const handleDeleteProductRequest = (id: string) => {
     const productToDelete = products.find(p => p.id === id);
     const featuredCount = products.filter(p => p.featured).length;
     
-    // REGRA DE SEGURANÇA: Impedir exclusão do único destaque
     if (productToDelete?.featured && featuredCount <= 1) {
         alert("Este é o único produto em destaque. A vitrine não pode ficar vazia.");
         return;
@@ -153,7 +149,6 @@ const App: React.FC = () => {
     setIsAdminTestimonialOpen(false);
   };
 
-  // Solicita a exclusão do depoimento (abre modal)
   const handleDeleteTestimonialRequest = (id: string) => {
     if (testimonials.length <= 1) {
       alert("A vitrine precisa de pelo menos um depoimento.");
@@ -162,7 +157,6 @@ const App: React.FC = () => {
     setConfirmDelete({ isOpen: true, type: 'testimonial', id });
   };
 
-  // Executa a exclusão confirmada
   const executeDelete = () => {
     if (confirmDelete.type === 'product' && confirmDelete.id) {
       setProducts(prev => prev.filter(p => p.id !== confirmDelete.id));
@@ -173,14 +167,11 @@ const App: React.FC = () => {
       setTestimonials(prev => prev.filter(t => t.id !== confirmDelete.id));
     }
     
-    // Fecha o modal e limpa o estado
     setConfirmDelete({ isOpen: false, type: null, id: null });
   };
 
   const mainCatalog = pdfCatalogs[0] || INITIAL_PDF_CATALOGS[0];
   const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER.replace(/\D/g, '')}`;
-
-  // Cálculo prévio de destaques para passar para o card
   const featuredCount = products.filter(p => p.featured).length;
 
   return (
@@ -206,16 +197,16 @@ const App: React.FC = () => {
       
       <main className="flex-grow">
         <div className="flex flex-col">
-          <section id="inicio" className="min-h-screen flex flex-col justify-center container mx-auto px-4 pt-24">
+          <section id="inicio" className="flex flex-col justify-center container mx-auto px-4 pt-24 min-h-[90vh] md:min-h-screen">
             <Hero theme={theme} setView={setView} heroImage={heroImage} isAdmin={isAdminAuthenticated} onHeroImageChange={setHeroImage} />
           </section>
 
-          <section id="diferenciais" className="min-h-screen flex flex-col justify-center bg-fuzzi-blue/5 dark:bg-slate-900/20 py-20">
+          <section id="diferenciais" className="flex flex-col justify-center bg-fuzzi-blue/5 dark:bg-slate-900/20 py-10 md:py-20">
             <Features theme={theme} />
           </section>
           
-          <section id="produtos" className="min-h-screen flex flex-col justify-center container mx-auto px-4 py-20">
-            <div className="flex flex-col md:flex-row justify-between items-end gap-4 mb-16">
+          <section id="produtos" className="flex flex-col justify-center container mx-auto px-4 py-10 md:py-20">
+            <div className="flex flex-col md:flex-row justify-between items-end gap-4 mb-8 md:mb-16">
               <div className="max-w-xl text-center md:text-left">
                 <span className="text-fuzzi-blue font-black uppercase tracking-[0.3em] text-[10px] block mb-4">Nossa Vitrine</span>
                 <h2 className="text-4xl md:text-6xl font-black tracking-tight leading-none">Projetos de <span className="text-fuzzi-blue">Alto Padrão</span></h2>
@@ -241,33 +232,62 @@ const App: React.FC = () => {
             </div>
           </section>
 
-          <section id="catalogo" className="min-h-screen flex flex-col justify-center py-24 relative overflow-hidden bg-fuzzi-blue/5 dark:bg-slate-900/20">
+          <section id="catalogo" className="flex flex-col justify-center py-10 md:py-24 relative overflow-hidden bg-fuzzi-blue/5 dark:bg-slate-900/20">
               <div className="container mx-auto px-4">
-                <div className={`relative overflow-hidden rounded-[4rem] border transition-theme ${
+                <div className={`relative overflow-hidden rounded-[2.5rem] lg:rounded-[4rem] border transition-all ${
                   theme === 'dark' ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-fuzzi-blue/10 shadow-2xl shadow-fuzzi-blue/5'
                 }`}>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 items-center">
-                    <div className="p-12 lg:p-24 space-y-8">
-                      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-fuzzi-blue text-white text-[10px] font-black uppercase tracking-widest">
+                  
+                  {/* IMAGEM DE FUNDO (Apenas Mobile) */}
+                  <div className="absolute inset-0 lg:hidden">
+                    <img src={mainCatalog?.coverImage} alt="" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-slate-950/85 backdrop-blur-[2px]"></div>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 items-center relative z-10">
+                    <div className="p-8 md:p-12 lg:p-24 space-y-6 lg:space-y-8 text-center lg:text-left">
+                      <div className="inline-flex items-center justify-center lg:justify-start gap-2 px-4 py-2 rounded-full bg-fuzzi-blue text-white text-[10px] font-black uppercase tracking-widest mx-auto lg:mx-0">
                         <FileText className="w-4 h-4" /> Especificações Técnicas
                       </div>
-                      <h2 className="text-4xl md:text-6xl font-black leading-tight">
+                      
+                      <h2 className={`text-3xl sm:text-4xl md:text-6xl font-black leading-tight ${
+                        'text-white lg:' + (theme === 'dark' ? 'text-white' : 'text-slate-900')
+                      }`}>
                         {mainCatalog?.title || 'Catálogo de Esquadrias'}
                       </h2>
-                      <p className={`text-lg leading-relaxed ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
+                      
+                      <p className={`text-sm sm:text-lg leading-relaxed ${
+                         'text-slate-300 lg:' + (theme === 'dark' ? 'text-slate-400' : 'text-slate-600')
+                      }`}>
                         Confira todos os detalhes técnicos, acabamentos e tipologias disponíveis em nossa linha premium. Um material completo para arquitetos e clientes exigentes.
                       </p>
-                      <div className="flex flex-wrap gap-4 pt-4">
-                        <a href={mainCatalog?.pdfUrl || '#'} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-10 py-5 bg-fuzzi-blue text-white font-black rounded-2xl hover:brightness-110 transition-all shadow-xl shadow-fuzzi-blue/20 active:scale-95 text-lg">
-                          <ExternalLink className="w-6 h-6" /> Acessar Catálogo
+                      
+                      <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                        <a 
+                          href={mainCatalog?.pdfUrl || '#'} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 lg:px-10 py-4 lg:py-5 bg-fuzzi-blue text-white font-black rounded-xl lg:rounded-2xl hover:brightness-110 transition-all shadow-xl shadow-fuzzi-blue/20 active:scale-95 text-base lg:text-lg"
+                        >
+                          <ExternalLink className="w-5 h-5 lg:w-6 lg:h-6" /> Acessar Catálogo
                         </a>
-                        <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className={`group flex items-center gap-3 px-10 py-5 font-black rounded-2xl border-2 transition-all duration-300 active:scale-95 hover:bg-[#25D366] hover:border-[#25D366] hover:text-white text-lg ${theme === 'dark' ? 'border-slate-800 text-white' : 'border-fuzzi-blue/10 text-fuzzi-blue shadow-sm bg-white'}`}>
-                          <WhatsAppIcon className="w-6 h-6 text-[#25D366] group-hover:text-white transition-colors" />
+                        <a 
+                          href={whatsappUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className={`w-full sm:w-auto group flex items-center justify-center gap-3 px-8 lg:px-10 py-4 lg:py-5 font-black rounded-xl lg:rounded-2xl border-2 transition-all duration-300 active:scale-95 text-base lg:text-lg hover:bg-[#25D366] hover:border-[#25D366] hover:text-white ${
+                            'border-slate-600 text-white lg:border-slate-800 lg:text-white'
+                          } ${
+                            theme !== 'dark' ? 'lg:border-fuzzi-blue/10 lg:text-fuzzi-blue lg:shadow-sm lg:bg-white' : ''
+                          }`}
+                        >
+                          <WhatsAppIcon className="w-5 h-5 lg:w-6 lg:h-6 text-[#25D366] group-hover:text-white transition-colors" />
                           Falar com um vendedor
                         </a>
                       </div>
                     </div>
-                    <div className="relative aspect-square lg:aspect-auto lg:h-full overflow-hidden bg-slate-100 group">
+
+                    <div className="hidden lg:block relative aspect-square lg:aspect-auto lg:h-full overflow-hidden bg-slate-100 group">
                       <img src={mainCatalog?.coverImage} alt="Capa do Catálogo" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
                       <div className="absolute inset-0 bg-gradient-to-r from-slate-900/40 lg:from-slate-900/80 to-transparent pointer-events-none"></div>
                     </div>
@@ -276,7 +296,7 @@ const App: React.FC = () => {
               </div>
           </section>
 
-          <section id="depoimentos" className="min-h-screen flex flex-col justify-center py-20">
+          <section id="depoimentos" className="flex flex-col justify-center">
             <Testimonials 
               theme={theme} 
               testimonials={testimonials} 
@@ -290,7 +310,6 @@ const App: React.FC = () => {
 
       <Footer theme={theme} isAdmin={isAdminAuthenticated} isLoginOpen={isLoginOpen} onAdminToggle={handleAdminToggle} onLogin={onLoginSuccess} setIsLoginOpen={setIsLoginOpen} setView={setView} />
 
-      {/* Modais */}
       {selectedProduct && (
         <ProductDetail 
           product={selectedProduct} 
@@ -306,7 +325,6 @@ const App: React.FC = () => {
         <TestimonialModal theme={theme} onClose={() => setIsAdminTestimonialOpen(false)} onSave={handleSaveTestimonial} editTestimonial={currentTestimonial} />
       )}
 
-      {/* Modal de Confirmação de Exclusão */}
       <ConfirmModal
         theme={theme}
         isOpen={confirmDelete.isOpen}

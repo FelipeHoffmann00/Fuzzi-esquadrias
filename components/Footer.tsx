@@ -1,42 +1,33 @@
 
 import React, { useState } from 'react';
-import { Phone, Mail, MapPin, Instagram, Check, Lock, Unlock, ArrowRight, X } from 'lucide-react';
+import { Instagram, Lock, Unlock, Phone, Mail, MapPin, ArrowRight } from 'lucide-react';
 import { Theme, View } from '../types';
 import { WHATSAPP_NUMBER } from '../constants';
+import WhatsAppIcon from './WhatsAppIcon';
 
 interface FooterProps {
   theme: Theme;
   isAdmin: boolean;
   isLoginOpen: boolean;
   onAdminToggle: () => void;
-  onLogin: () => void;
+  onLogin: (password: string) => void;
   setIsLoginOpen: (open: boolean) => void;
   setView: (view: View) => void;
 }
 
-const Footer: React.FC<FooterProps> = ({ theme, isAdmin, isLoginOpen, onAdminToggle, onLogin, setIsLoginOpen, setView }) => {
+const Footer: React.FC<FooterProps> = ({ theme, isAdmin, onAdminToggle, onLogin, setView }) => {
   const [emailCopied, setEmailCopied] = useState(false);
+  const [showPasswordInput, setShowPasswordInput] = useState(false);
   const [password, setPassword] = useState('');
-  const [loginError, setLoginError] = useState(false);
+  const [error, setError] = useState(false);
   
   const emailAddress = 'fuzziesquadrias@hotmail.com';
-  const addressText = 'Praça Manoel de Vasconcelos, 593 - Centro, Sumaré - SP, 13170-025';
+  const addressText = 'Praça Manoel de Vasconcelos, 593 - Centro, Sumaré - SP';
 
   const handleCopyEmail = () => {
     navigator.clipboard.writeText(emailAddress);
     setEmailCopied(true);
     setTimeout(() => setEmailCopied(false), 2000);
-  };
-
-  const handleLoginSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password === '123') {
-      setLoginError(false);
-      setPassword('');
-      onLogin();
-    } else {
-      setLoginError(true);
-    }
   };
 
   const scrollToSection = (id: string) => {
@@ -47,200 +38,175 @@ const Footer: React.FC<FooterProps> = ({ theme, isAdmin, isLoginOpen, onAdminTog
     }, 100);
   };
 
-  const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressText)}`;
+  const handleLoginSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password === '123') {
+      onLogin(password);
+      setShowPasswordInput(false);
+      setPassword('');
+      setError(false);
+    } else {
+      setError(true);
+      setTimeout(() => setError(false), 2000);
+    }
+  };
+
   const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER.replace(/\D/g, '')}`;
 
-  const navLinks = [
-    { label: 'Início', id: 'inicio' },
-    { label: 'Diferenciais', id: 'diferenciais' },
-    { label: 'Produtos', id: 'produtos' },
-    { label: 'Catálogo', id: 'catalogo' },
-    { label: 'Depoimentos', id: 'depoimentos' },
-  ];
-
-  const leftLinks = navLinks.slice(0, 4);
-  const rightLinks = navLinks.slice(4);
-
   return (
-    <footer className={`py-12 border-t transition-theme ${
-      theme === 'dark' ? 'bg-slate-950 border-slate-800 text-slate-400' : 'bg-fuzzi-blue/5 border-fuzzi-blue/10 text-slate-600'
+    <footer className={`pt-12 pb-8 border-t transition-theme ${
+      theme === 'dark' ? 'bg-slate-950 border-slate-800 text-slate-400' : 'bg-fuzzi-light border-slate-200 text-slate-600'
     }`}>
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-          <div className="col-span-1">
-            <div className="flex items-center space-x-2 mb-6">
+        
+        {/* Layout Principal */}
+        <div className="flex flex-col lg:flex-row items-start lg:justify-center lg:gap-24 gap-10 mb-12">
+          
+          {/* 1. Marca (Esquerda) */}
+          <div className="flex flex-col items-start space-y-4 order-1 lg:max-w-xs">
+            <div>
               <span className={`text-2xl font-black tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-fuzzi-gray'}`}>
                 FUZZI
               </span>
+              <p className="text-sm mt-2 leading-relaxed opacity-80">
+                Excelência em esquadrias de alumínio para projetos de alto padrão. Qualidade que você vê, segurança que você sente.
+              </p>
             </div>
-            <p className="text-sm leading-relaxed mb-6">
-              Excelência em esquadrias de alumínio para projetos residenciais e comerciais de alto padrão. Qualidade que você vê, segurança que você sente.
-            </p>
-            <div className="flex gap-4">
+            <div className="flex gap-3">
               <a 
                 href="https://www.instagram.com/fuzziesquadrias/" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="p-2 rounded-full bg-fuzzi-blue/10 text-fuzzi-blue hover:bg-fuzzi-blue hover:text-white transition-all"
-                title="Siga-nos no Instagram"
+                className="p-2.5 rounded-xl bg-fuzzi-blue/10 text-fuzzi-blue hover:bg-fuzzi-blue hover:text-white transition-all shadow-sm"
+                aria-label="Instagram"
               >
                 <Instagram className="w-5 h-5" />
+              </a>
+              <a 
+                href={whatsappUrl}
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="p-2.5 rounded-xl bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white transition-all shadow-sm"
+                aria-label="WhatsApp"
+              >
+                <WhatsAppIcon className="w-5 h-5" />
               </a>
             </div>
           </div>
 
-          <div>
-            <h4 className={`text-sm font-black uppercase tracking-widest mb-6 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Contato</h4>
-            <ul className="space-y-6 text-sm">
-              <li className="flex items-start">
-                <a 
-                  href={whatsappUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-4 hover:text-fuzzi-blue transition-colors group"
-                >
-                  <Phone className="w-5 h-5 text-fuzzi-blue group-hover:scale-110 transition-transform flex-shrink-0" />
-                  <span className="font-medium text-base">+55 (19) 98446-2287</span>
-                </a>
-              </li>
-              
-              <li className="flex items-start group">
-                <button 
-                  onClick={handleCopyEmail}
-                  className="flex items-start gap-4 hover:text-fuzzi-blue transition-colors w-full text-left"
-                >
-                  <div className="w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    {emailCopied ? (
-                      <Check className="w-5 h-5 text-green-500" />
-                    ) : (
-                      <Mail className="w-5 h-5 text-fuzzi-blue" />
-                    )}
-                  </div>
-                  <div className="flex flex-col relative">
-                    <span className="font-medium text-base leading-none">{emailAddress}</span>
-                    <span className={`absolute top-full left-0 text-[10px] font-black uppercase tracking-wider transition-all duration-300 mt-1.5 whitespace-nowrap ${
-                      emailCopied 
-                        ? 'text-green-500 opacity-100 translate-y-0' 
-                        : 'text-fuzzi-blue opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0'
-                    }`}>
-                      {emailCopied ? 'E-mail copiado!' : 'CLIQUE PARA COPIAR'}
-                    </span>
-                  </div>
-                </button>
-              </li>
-
-              <li className="flex items-start">
-                <a 
-                  href={googleMapsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-start gap-4 hover:text-fuzzi-blue transition-colors group"
-                  title="Abrir no Google Maps"
-                >
-                  <MapPin className="w-5 h-5 text-fuzzi-blue flex-shrink-0 mt-0.5 group-hover:animate-bounce transition-transform" />
-                  <span className="font-medium text-base leading-snug">{addressText}</span>
-                </a>
-              </li>
-            </ul>
+          {/* 2. Contato (Meio) - Ordem 2 no mobile */}
+          <div className="flex flex-col items-start space-y-4 order-2 lg:order-2">
+            <h4 className={`text-[10px] font-black uppercase tracking-widest mb-0 lg:mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+              Fale Conosco
+            </h4>
+            <div className="space-y-3 text-sm">
+              <p className="hover:text-fuzzi-blue transition-colors cursor-pointer block font-medium flex items-center gap-2">
+                <Phone className="w-4 h-4 opacity-50" />
+                +55 (19) 98446-2287
+              </p>
+              <button onClick={handleCopyEmail} className="hover:text-fuzzi-blue transition-colors block w-full text-left font-medium">
+                 <span className={`flex items-center gap-2 ${emailCopied ? 'text-green-500 font-bold' : ''}`}>
+                    <Mail className="w-4 h-4 opacity-50" />
+                    {emailCopied ? 'E-mail copiado!' : emailAddress}
+                 </span>
+              </button>
+              <a 
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressText)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-fuzzi-blue transition-colors block font-medium flex items-start gap-2 text-left group"
+              >
+                <MapPin className="w-4 h-4 opacity-50 shrink-0 mt-0.5 group-hover:opacity-100" />
+                <span className="leading-relaxed max-w-xs">{addressText}</span>
+              </a>
+            </div>
           </div>
 
-          <div>
-            <h4 className={`text-sm font-black uppercase tracking-widest mb-6 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Links</h4>
+          {/* 3. Navegação (Direita) - Ordem 3 no mobile */}
+          <div className="flex flex-col items-start order-3 lg:order-3">
+            <h4 className={`text-[10px] font-black uppercase tracking-widest mb-4 lg:mb-6 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+              Navegação
+            </h4>
             
-            <div className="flex gap-12">
-              <ul className="space-y-3 text-sm">
-                {leftLinks.map((link) => (
-                  <li key={link.id}>
-                    <button 
-                      onClick={() => scrollToSection(link.id)} 
-                      className="hover:text-fuzzi-blue transition-colors text-left"
-                    >
-                      {link.label}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-              
-              <ul className="space-y-3 text-sm">
-                {rightLinks.map((link) => (
-                  <li key={link.id}>
-                    <button 
-                      onClick={() => scrollToSection(link.id)} 
-                      className="hover:text-fuzzi-blue transition-colors text-left"
-                    >
-                      {link.label}
-                    </button>
-                  </li>
-                ))}
+            <div className="grid grid-cols-2 gap-x-12 gap-y-2 text-left">
+              <div className="flex flex-col gap-3">
+                <button onClick={() => scrollToSection('inicio')} className="text-sm hover:text-fuzzi-blue transition-colors text-left">Início</button>
+                <button onClick={() => scrollToSection('diferenciais')} className="text-sm hover:text-fuzzi-blue transition-colors text-left">Diferenciais</button>
+                <button onClick={() => scrollToSection('produtos')} className="text-sm hover:text-fuzzi-blue transition-colors text-left">Produtos</button>
+                <button onClick={() => scrollToSection('catalogo')} className="text-sm hover:text-fuzzi-blue transition-colors text-left">Catálogo</button>
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <button onClick={() => scrollToSection('depoimentos')} className="text-sm hover:text-fuzzi-blue transition-colors text-left">Depoimentos</button>
                 
-                <li className="relative">
+                <div className="flex flex-col gap-2">
                   <button 
                     onClick={(e) => {
                       e.preventDefault();
-                      onAdminToggle();
+                      if (isAdmin) {
+                        onAdminToggle();
+                      } else {
+                        setShowPasswordInput(!showPasswordInput);
+                      }
                     }}
                     type="button"
-                    className={`flex items-center gap-2 transition-colors font-bold ${isAdmin ? 'text-green-500' : 'hover:text-fuzzi-blue'}`}
+                    className={`text-sm flex items-center gap-1.5 transition-colors text-left ${isAdmin ? 'text-green-500 hover:text-red-500' : 'hover:text-fuzzi-blue'}`}
                   >
-                    {isAdmin ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
-                    {isAdmin ? 'Sair' : 'Administrador'}
+                    {isAdmin ? (
+                      <>
+                        <Unlock className="w-3 h-3" /> Sair
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="w-3 h-3 opacity-70" /> Administrador
+                      </>
+                    )}
                   </button>
 
-                  {isLoginOpen && !isAdmin && (
-                    <div className={`absolute right-0 bottom-full mb-4 p-4 rounded-2xl shadow-2xl z-50 w-64 border animate-in slide-in-from-bottom-2 duration-300 ${
-                      theme === 'dark' ? 'bg-slate-900 border-slate-800 shadow-black' : 'bg-white border-fuzzi-blue/10 shadow-fuzzi-blue/10'
-                    }`}>
-                      <div className="flex justify-between items-center mb-3">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-fuzzi-blue">Senha Admin</span>
-                        <button onClick={() => setIsLoginOpen(false)} className="text-slate-400 hover:text-red-500">
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
-                      <form onSubmit={handleLoginSubmit} className="flex gap-2">
+                  {!isAdmin && showPasswordInput && (
+                    <form onSubmit={handleLoginSubmit} className="flex flex-col gap-2 animate-in slide-in-from-top-1 duration-200">
+                      <div className="relative">
                         <input 
                           type="password"
                           value={password}
-                          onChange={(e) => { setPassword(e.target.value); setLoginError(false); }}
-                          placeholder="••••••"
+                          onChange={(e) => setPassword(e.target.value)}
+                          placeholder="Senha"
                           autoFocus
-                          className={`flex-1 px-3 py-2 rounded-xl text-xs border outline-none focus:ring-1 focus:ring-fuzzi-blue ${
-                            loginError 
-                              ? 'border-red-500 bg-red-50/10' 
-                              : theme === 'dark' ? 'bg-slate-800 border-slate-700 text-white' : 'bg-fuzzi-blue/5 border-fuzzi-blue/10 text-slate-900'
+                          className={`w-32 px-2 py-1.5 text-xs rounded-lg border outline-none transition-all ${
+                            error 
+                              ? 'border-red-500 bg-red-50/50' 
+                              : theme === 'dark' 
+                                ? 'bg-slate-900 border-slate-800 text-white' 
+                                : 'bg-white border-slate-200 text-slate-900'
                           }`}
                         />
-                        <button 
-                          type="submit"
-                          className="p-2 bg-fuzzi-blue text-white rounded-xl hover:brightness-110 transition-all active:scale-90"
-                        >
-                          <ArrowRight className="w-4 h-4" />
+                        <button type="submit" className="absolute right-1.5 top-1/2 -translate-y-1/2 text-fuzzi-blue hover:scale-110 transition-transform">
+                          <ArrowRight className="w-3.5 h-3.5" />
                         </button>
-                      </form>
-                      {loginError && <p className="text-[10px] text-red-500 mt-2 font-bold">Senha incorreta.</p>}
-                    </div>
+                      </div>
+                    </form>
                   )}
-                </li>
-              </ul>
+                </div>
+              </div>
             </div>
           </div>
+
         </div>
 
-        <div className="mt-12 pt-8 border-t border-inherit text-center text-[10px] md:text-xs flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 opacity-70">
-          <div className="flex items-center gap-2">
-            <p>© {new Date().getFullYear()} Fuzzi Esquadrias. Todos os direitos reservados.</p>
-          </div>
-          <span className="hidden sm:inline-block w-1 h-1 rounded-full bg-current opacity-30"></span>
-          <div className="flex items-center gap-1">
-            <span>Desenvolvido por</span>
-            <a 
-              href="https://www.linkedin.com/in/felipe-hoffmann-9bb7361a4/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="font-black hover:text-fuzzi-blue transition-colors underline decoration-fuzzi-blue/30 underline-offset-4"
-            >
-              Felipe Hoffmann
-            </a>
-          </div>
+        {/* Barra Inferior Centralizada */}
+        <div className={`pt-8 border-t flex flex-col md:flex-row items-center justify-center gap-4 md:gap-12 text-[10px] uppercase tracking-wider font-medium text-center ${
+           theme === 'dark' ? 'border-slate-800 text-slate-500' : 'border-slate-200 text-slate-400'
+        }`}>
+          <p>© {new Date().getFullYear()} Fuzzi Esquadrias. Todos os direitos reservados.</p>
+          
+          <a 
+            href="https://www.linkedin.com/in/felipe-hoffmann-9bb7361a4/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="hover:text-fuzzi-blue transition-colors"
+          >
+            Desenvolvido por Felipe Hoffmann
+          </a>
         </div>
       </div>
     </footer>

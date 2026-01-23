@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, ChevronLeft, ChevronRight, Star } from 'lucide-react';
+import { X, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import WhatsAppIcon from './WhatsAppIcon';
 import { Product, Theme } from '../types';
 import { WHATSAPP_NUMBER, DEFAULT_PRODUCT_IMAGE } from '../constants';
@@ -15,7 +15,12 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, theme, onClose }
   const [activeImage, setActiveImage] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   
+  // Estados para controle do Swipe (Toque e Mouse)
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  
   const images = (product.images && product.images.length > 0) ? product.images : [DEFAULT_PRODUCT_IMAGE];
+  const minSwipeDistance = 50; // Distância mínima para considerar um swipe
 
   useEffect(() => {
     requestAnimationFrame(() => setIsVisible(true));
@@ -35,14 +40,71 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, theme, onClose }
     `Olá! Tenho interesse no produto: ${product.name}. Gostaria de solicitar um orçamento.`
   )}`;
 
-  const handleNextImage = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  // --- Navegação ---
+  const handleNext = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
     setActiveImage((prev) => (prev + 1) % images.length);
   };
 
-  const handlePrevImage = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handlePrev = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
     setActiveImage((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  // --- Lógica de Swipe (Unificada) ---
+
+  const handleSwipeCheck = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      handleNext();
+    }
+    if (isRightSwipe) {
+      handlePrev();
+    }
+  };
+
+  // Touch Events (Celular)
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    handleSwipeCheck();
+  };
+
+  // Mouse Events (Desktop - Simulação)
+  const onMouseDown = (e: React.MouseEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.clientX);
+  };
+
+  const onMouseMove = (e: React.MouseEvent) => {
+    // Só atualiza se estiver clicando (arrastando)
+    if (touchStart !== null) {
+      setTouchEnd(e.clientX);
+    }
+  };
+
+  const onMouseUp = () => {
+    handleSwipeCheck();
+    setTouchStart(null);
+    setTouchEnd(null);
+  };
+
+  const onMouseLeave = () => {
+    // Se sair da área da imagem, cancela o arraste
+    setTouchStart(null);
+    setTouchEnd(null);
   };
 
   return (
@@ -53,23 +115,58 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, theme, onClose }
       onClick={handleClose}
     >
       {/* 
-          CONTAINER PRINCIPAL
+          CONTAINER PRINCIPAL - Layout Vertical Fixo
       */}
       <div 
-        className={`relative w-full max-w-7xl h-[85vh] flex flex-col lg:flex-row items-center gap-8 lg:gap-0 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+        className={`relative w-full max-w-xl h-[90vh] flex flex-col rounded-[2.5rem] shadow-2xl overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
           isVisible ? 'scale-100 translate-y-0 opacity-100' : 'scale-95 translate-y-8 opacity-0'
-        }`}
+        } ${theme === 'dark' ? 'bg-slate-900 border border-slate-800' : 'bg-white'}`}
         onClick={(e) => e.stopPropagation()}
       >
         
-        {/* --- COLUNA ESQUERDA: IMAGEM (60% Desktop) --- */}
-        <div className="w-full lg:w-[60%] h-[40vh] lg:h-full relative flex flex-col justify-center overflow-hidden order-2 lg:order-1">
+        {/* --- ÁREA DA IMAGEM (PRIORIDADE - 65% da Altura) --- */}
+        <div 
+          className="w-full h-[65%] relative flex flex-col justify-center overflow-hidden bg-black/5 touch-pan-y cursor-grab active:cursor-grabbing"
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+          onMouseDown={onMouseDown}
+          onMouseMove={onMouseMove}
+          onMouseUp={onMouseUp}
+          onMouseLeave={onMouseLeave}
+        >
           
+          {/* Botão Fechar Flutuante */}
+          <button 
+            onClick={handleClose}
+            className="absolute top-4 right-4 z-50 p-2 rounded-full bg-black/20 text-white backdrop-blur-md hover:bg-red-600 transition-all duration-200 active:scale-90 border border-white/10"
+          >
+            <X className="w-5 h-5" />
+          </button>
+
           {/* Badge de Destaque */}
           {product.featured && (
-            <div className="absolute top-0 left-0 z-20 px-3 py-1.5 bg-amber-500 text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg flex items-center gap-2">
+            <div className="absolute top-4 left-4 z-20 px-3 py-1.5 bg-amber-500 text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg flex items-center gap-2 pointer-events-none">
               <Star className="w-3 h-3 fill-current" /> Destaque
             </div>
+          )}
+
+          {/* SETAS DE NAVEGAÇÃO (Apenas Desktop) */}
+          {images.length > 1 && (
+            <>
+              <button 
+                onClick={handlePrev}
+                className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-black/20 text-white backdrop-blur-md hover:bg-black/40 transition-all border border-white/10 active:scale-95"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+              <button 
+                onClick={handleNext}
+                className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-black/20 text-white backdrop-blur-md hover:bg-black/40 transition-all border border-white/10 active:scale-95"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+            </>
           )}
 
           {/* CARROSSEL DESLIZANTE */}
@@ -78,121 +175,85 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, theme, onClose }
             style={{ transform: `translateX(-${activeImage * 100}%)` }}
           >
             {images.map((img, index) => (
-              <div key={index} className="w-full h-full flex-shrink-0 flex items-center justify-center p-4 relative">
+              <div key={index} className="w-full h-full flex-shrink-0 flex items-center justify-center p-0 relative">
                 <img 
                   src={img} 
                   alt={`${product.name} - Foto ${index + 1}`}
-                  className="max-w-full max-h-full object-contain drop-shadow-2xl" 
+                  className="w-full h-full object-cover select-none pointer-events-none" 
                   draggable={false}
                 />
               </div>
             ))}
           </div>
 
-          {/* SETAS FIXAS DE NAVEGAÇÃO */}
+          {/* Dots de Navegação */}
           {images.length > 1 && (
-            <>
-              <button 
-                onClick={handlePrevImage}
-                className="absolute left-0 top-1/2 -translate-y-1/2 p-4 rounded-full bg-black/20 hover:bg-black/40 text-white backdrop-blur-md transition-all hover:scale-110 active:scale-90 z-20 border border-white/10"
-              >
-                <ChevronLeft className="w-8 h-8" />
-              </button>
-              <button 
-                onClick={handleNextImage}
-                className="absolute right-0 top-1/2 -translate-y-1/2 p-4 rounded-full bg-black/20 hover:bg-black/40 text-white backdrop-blur-md transition-all hover:scale-110 active:scale-90 z-20 border border-white/10"
-              >
-                <ChevronRight className="w-8 h-8" />
-              </button>
-              
-              {/* Dots */}
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex gap-2 z-20 pb-4">
-                {images.map((_, idx) => (
-                  <button
-                    key={idx}
-                    onClick={(e) => { e.stopPropagation(); setActiveImage(idx); }}
-                    className={`w-2 h-2 rounded-full transition-all duration-300 shadow-sm ${
-                      activeImage === idx ? 'bg-white w-6' : 'bg-white/40 hover:bg-white/80'
-                    }`}
-                  />
-                ))}
-              </div>
-            </>
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-20 bg-black/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
+              {images.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={(e) => { e.stopPropagation(); setActiveImage(idx); }}
+                  className={`w-1.5 h-1.5 rounded-full transition-all duration-300 shadow-sm ${
+                    activeImage === idx ? 'bg-white w-4' : 'bg-white/40 hover:bg-white/80'
+                  }`}
+                />
+              ))}
+            </div>
           )}
         </div>
 
-        {/* --- COLUNA DIREITA: INFORMAÇÕES (40% Desktop) --- */}
-        <div className={`
-            relative w-full lg:w-[40%] h-full flex flex-col rounded-[2.5rem] shadow-2xl overflow-hidden order-1 lg:order-2
-            ${theme === 'dark' ? 'bg-slate-900 border border-slate-800' : 'bg-white'}
-        `}>
-           {/* Botão Fechar dentro do Card */}
-          <button 
-            onClick={handleClose}
-            className={`absolute top-6 right-6 z-50 p-2 rounded-full transition-all duration-200 active:scale-90 ${
-                theme === 'dark' 
-                ? 'bg-slate-800 text-slate-400 hover:bg-red-600 hover:text-white' 
-                : 'bg-slate-100 text-slate-500 hover:bg-red-500 hover:text-white'
-            }`}
-          >
-            <X className="w-5 h-5" />
-          </button>
+        {/* --- ÁREA DE INFORMAÇÕES (SECUNDÁRIA - 35% da Altura) --- */}
+        <div className="w-full h-[35%] flex flex-col relative z-10 -mt-6 bg-inherit rounded-t-[2rem]">
+           {/* Puxador visual (apenas estético) */}
+           <div className="w-full flex justify-center pt-3 pb-1">
+             <div className={`w-12 h-1 rounded-full ${theme === 'dark' ? 'bg-slate-700' : 'bg-slate-200'}`}></div>
+           </div>
 
-          <div className={`flex-1 overflow-y-auto p-8 lg:p-12 custom-scrollbar ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-            
-            <span className="inline-block px-3 py-1 rounded-full bg-fuzzi-blue/10 text-fuzzi-blue text-[10px] font-black uppercase tracking-widest mb-4">
-              {product.category}
-            </span>
-            
-            <h2 className="text-3xl md:text-4xl font-black leading-tight mb-6 pr-8">
-              {product.name}
-            </h2>
-            
-            <div className="h-1 w-20 bg-fuzzi-blue rounded-full mb-8"></div>
+          <div className={`flex-1 overflow-y-auto px-6 pb-4 pt-2 custom-scrollbar ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+            <div className="flex items-start justify-between gap-4 mb-2">
+              <h2 className="text-xl md:text-2xl font-black leading-tight">
+                {product.name}
+              </h2>
+              <span className="shrink-0 px-2 py-1 rounded-lg bg-fuzzi-blue/10 text-fuzzi-blue text-[9px] font-black uppercase tracking-wider">
+                {product.category}
+              </span>
+            </div>
 
             <div className={`prose max-w-none ${theme === 'dark' ? 'prose-invert' : ''}`}>
-              <h3 className="text-xs font-black uppercase tracking-widest opacity-60 mb-4">
-                Sobre o Projeto
-              </h3>
-              <p className={`text-lg leading-relaxed ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>
+              <p className={`text-sm leading-relaxed ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
                 {product.description}
               </p>
             </div>
 
-            {/* Thumbnails */}
+            {/* Thumbnails Pequenos */}
             {images.length > 1 && (
-              <div className="mt-8 pt-8 border-t border-inherit opacity-50 hover:opacity-100 transition-opacity">
-                 <h4 className="text-[10px] font-black uppercase tracking-widest mb-3 opacity-70">Galeria</h4>
-                 <div className="flex gap-2 flex-wrap">
-                    {images.map((img, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => setActiveImage(idx)}
-                        className={`w-12 h-12 rounded-lg overflow-hidden border-2 transition-all ${
-                          activeImage === idx ? 'border-fuzzi-blue opacity-100' : 'border-transparent opacity-60 hover:opacity-100'
-                        }`}
-                      >
-                        <img src={img} className="w-full h-full object-cover" alt="" />
-                      </button>
-                    ))}
-                 </div>
-              </div>
+               <div className="flex gap-2 mt-4 overflow-x-auto pb-2 scrollbar-hide">
+                  {images.map((img, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setActiveImage(idx)}
+                      className={`w-10 h-10 shrink-0 rounded-lg overflow-hidden border transition-all ${
+                        activeImage === idx ? 'border-fuzzi-blue opacity-100 ring-1 ring-fuzzi-blue' : 'border-transparent opacity-50 hover:opacity-100'
+                      }`}
+                    >
+                      <img src={img} className="w-full h-full object-cover" alt="" />
+                    </button>
+                  ))}
+               </div>
             )}
           </div>
 
-          {/* Footer Fixo */}
-          <div className={`p-6 border-t ${theme === 'dark' ? 'border-slate-800' : 'border-slate-100'}`}>
-            <div className="space-y-3">
-              <a 
-                href={whatsappLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full flex items-center justify-center gap-3 py-4 bg-fuzzi-blue hover:bg-[#25D366] text-white font-black text-base rounded-xl transition-all shadow-lg hover:shadow-[#25D366]/20 active:scale-95 group uppercase tracking-widest"
-              >
-                <WhatsAppIcon className="w-5 h-5 fill-white group-hover:scale-110 transition-transform" />
-                Solicitar Orçamento
-              </a>
-            </div>
+          {/* Footer com Botão */}
+          <div className={`p-4 border-t mt-auto ${theme === 'dark' ? 'border-slate-800 bg-slate-900' : 'border-slate-100 bg-white'}`}>
+            <a 
+              href={whatsappLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full flex items-center justify-center gap-2 py-3 bg-fuzzi-blue hover:bg-[#25D366] text-white font-bold text-sm rounded-xl transition-all shadow-lg hover:shadow-[#25D366]/20 active:scale-95 group uppercase tracking-widest"
+            >
+              <WhatsAppIcon className="w-4 h-4 fill-white group-hover:scale-110 transition-transform" />
+              Solicitar Orçamento
+            </a>
           </div>
         </div>
       </div>

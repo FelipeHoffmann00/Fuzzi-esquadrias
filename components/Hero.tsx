@@ -89,11 +89,11 @@ const Hero: React.FC<HeroProps> = ({ theme, setView, heroImage, isAdmin, onHeroI
   };
 
   return (
-    <div className="py-12 md:py-20 flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
+    <div className="py-8 md:py-20 flex flex-col lg:flex-row items-center gap-8 lg:gap-20">
       
       {/* Coluna da Esquerda: Texto */}
-      <div className="flex-1 text-left animate-in slide-in-from-left-8 duration-700">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-fuzzi-blue/10 text-fuzzi-blue text-[10px] font-black uppercase tracking-[0.2em] mb-8">
+      <div className="flex-1 text-center lg:text-left animate-in slide-in-from-left-8 duration-700">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-fuzzi-blue/10 text-fuzzi-blue text-[10px] font-black uppercase tracking-[0.2em] mb-6 md:mb-8 mx-auto lg:mx-0">
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-fuzzi-blue opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2 w-2 bg-fuzzi-blue"></span>
@@ -101,22 +101,22 @@ const Hero: React.FC<HeroProps> = ({ theme, setView, heroImage, isAdmin, onHeroI
           Qualidade em cada detalhe
         </div>
         
-        <h1 className={`text-5xl md:text-6xl lg:text-8xl font-extrabold mb-8 leading-[1.05] tracking-tight transition-colors duration-300 ${theme === 'dark' ? 'text-white' : 'text-fuzzi-gray'}`}>
-          Design & Qualidade em <br />
-          <span className="text-fuzzi-blue">Esquadrias</span>
+        <h1 className={`text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-extrabold mb-6 md:mb-8 leading-[1.05] tracking-tight transition-colors duration-300 ${theme === 'dark' ? 'text-white' : 'text-fuzzi-gray'}`}>
+          Design & Qualidade <br />
+          em <span className="text-fuzzi-blue">Esquadrias</span>
         </h1>
         
-        <p className={`text-xl md:text-2xl mb-4 max-w-xl transition-colors duration-300 leading-relaxed ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
+        <p className={`text-lg md:text-2xl mb-4 max-w-xl transition-colors duration-300 leading-relaxed mx-auto lg:mx-0 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
           Soluções sob medida em alumínio para transformar seu ambiente. 
           Durabilidade, estética e tecnologia integradas em cada detalhe da sua obra.
         </p>
       </div>
 
       {/* Coluna da Direita: Imagem */}
-      <div className="flex-1 w-full relative group animate-in slide-in-from-right-8 duration-1000">
+      <div className="flex-1 w-[90%] md:w-full relative group animate-in slide-in-from-right-8 duration-1000 mx-auto">
         <div className="absolute -inset-10 bg-fuzzi-blue/20 blur-[100px] rounded-full opacity-40 group-hover:opacity-60 transition-opacity duration-1000"></div>
         
-        <div className={`relative overflow-hidden rounded-[3rem] transition-all duration-700 ease-out fix-clipping ${
+        <div className={`relative overflow-hidden rounded-[2.5rem] md:rounded-[3rem] transition-all duration-700 ease-out fix-clipping ${
           theme === 'dark' 
             ? 'ring-1 ring-white/10 shadow-[0_30px_100px_-20px_rgba(0,0,0,0.8),0_0_60px_-10px_rgba(0,207,255,0.4)]' 
             : 'ring-1 ring-black/5 shadow-[0_30px_100px_-20px_rgba(0,0,0,0.2),0_0_40px_-10px_rgba(0,0,0,0.1)]'
@@ -125,7 +125,7 @@ const Hero: React.FC<HeroProps> = ({ theme, setView, heroImage, isAdmin, onHeroI
           <img 
             src={heroImage} 
             alt="Fuzzi Esquadrias Showroom" 
-            className={`w-full aspect-[4/5] lg:aspect-square object-cover transition-all duration-1000 ease-out ${isProcessing ? 'opacity-50 scale-105' : 'opacity-100 scale-100 group-hover:scale-110'}`}
+            className={`w-full aspect-square object-cover transition-all duration-1000 ease-out ${isProcessing ? 'opacity-50 scale-105' : 'opacity-100 scale-100 group-hover:scale-110'}`}
           />
           
           <div className={`absolute inset-0 transition-opacity duration-700 ${theme === 'dark' ? 'bg-gradient-to-t from-slate-950/20 to-transparent' : 'bg-gradient-to-t from-fuzzi-blue/5 to-transparent'}`}></div>

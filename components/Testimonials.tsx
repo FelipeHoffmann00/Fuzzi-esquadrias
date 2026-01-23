@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Star, Quote, ChevronLeft, ChevronRight, MapPin, CheckCircle, Edit3, Trash2 } from 'lucide-react';
+import { Star, Quote, MapPin, CheckCircle, Edit3, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Theme, Testimonial } from '../types';
 import { DEFAULT_TESTIMONIAL_IMAGE } from '../constants';
 
@@ -17,6 +17,11 @@ const Testimonials: React.FC<TestimonialsProps> = ({ theme, testimonials, isAdmi
   const [progress, setProgress] = useState(0);
   const autoPlayRef = useRef<number | null>(null);
   const progressIntervalRef = useRef<number | null>(null);
+  
+  // Estados para controle do Swipe (Toque e Mouse)
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const minSwipeDistance = 50;
   
   const SLIDE_DURATION = 16000; 
 
@@ -70,14 +75,86 @@ const Testimonials: React.FC<TestimonialsProps> = ({ theme, testimonials, isAdmi
     startTimers();
   };
 
+  const onNextClick = () => {
+    handleNext();
+    startTimers();
+  };
+
+  const onPrevClick = () => {
+    handlePrev();
+    startTimers();
+  };
+
+  // --- Lógica de Swipe ---
+
+  const handleSwipeCheck = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      onNextClick();
+    }
+    if (isRightSwipe) {
+      onPrevClick();
+    }
+  };
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+    // Pausar o timer enquanto segura
+    if (autoPlayRef.current) window.clearInterval(autoPlayRef.current);
+    if (progressIntervalRef.current) window.clearInterval(progressIntervalRef.current);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    handleSwipeCheck();
+    startTimers();
+  };
+
+  const onMouseDown = (e: React.MouseEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.clientX);
+    if (autoPlayRef.current) window.clearInterval(autoPlayRef.current);
+    if (progressIntervalRef.current) window.clearInterval(progressIntervalRef.current);
+  };
+
+  const onMouseMove = (e: React.MouseEvent) => {
+    if (touchStart !== null) {
+      setTouchEnd(e.clientX);
+    }
+  };
+
+  const onMouseUp = () => {
+    handleSwipeCheck();
+    setTouchStart(null);
+    setTouchEnd(null);
+    startTimers();
+  };
+
+  const onMouseLeave = () => {
+    if (touchStart !== null) {
+       setTouchStart(null);
+       setTouchEnd(null);
+       startTimers();
+    }
+  };
+
   const isDeleteDisabled = testimonials.length <= 1;
 
   if (testimonials.length === 0) return null;
 
   return (
-    <section className="py-20 relative overflow-hidden">
+    <section className="py-10 md:py-20 relative overflow-hidden select-none">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
+        <div className="text-center mb-8 md:mb-16">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-fuzzi-blue/10 text-fuzzi-blue text-[10px] font-black uppercase tracking-[0.2em] mb-3">
             Excelência Comprovada
           </div>
@@ -86,7 +163,16 @@ const Testimonials: React.FC<TestimonialsProps> = ({ theme, testimonials, isAdmi
           </h2>
         </div>
 
-        <div className="relative max-w-6xl mx-auto h-[480px] flex items-center justify-center">
+        <div 
+          className="relative max-w-6xl mx-auto h-[480px] flex items-center justify-center cursor-grab active:cursor-grabbing touch-pan-y"
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+          onMouseDown={onMouseDown}
+          onMouseMove={onMouseMove}
+          onMouseUp={onMouseUp}
+          onMouseLeave={onMouseLeave}
+        >
           <div className="relative w-full h-full flex items-center justify-center perspective-1000">
             {testimonials.map((testimonial, index) => {
               const total = testimonials.length;
@@ -99,8 +185,11 @@ const Testimonials: React.FC<TestimonialsProps> = ({ theme, testimonials, isAdmi
               return (
                 <div
                   key={testimonial.id}
-                  onClick={() => position !== "active" && goToSlide(index)}
-                  className={`absolute w-full max-w-lg transition-all duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] cursor-pointer select-none rounded-[2.5rem] overflow-hidden border ${
+                  onClick={() => {
+                     // Permite clicar nos cards laterais para navegar, se não houver arraste
+                     if (!touchEnd && position !== "active") goToSlide(index);
+                  }}
+                  className={`absolute w-full max-w-lg transition-all duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] cursor-pointer rounded-[2.5rem] overflow-hidden border ${
                     position === "active" 
                       ? "z-50 opacity-100 translate-x-0 scale-100 shadow-[0_30px_60px_-15px_rgba(0,0,255,0.15)] blur-0" 
                       : position === "prev"
@@ -113,7 +202,7 @@ const Testimonials: React.FC<TestimonialsProps> = ({ theme, testimonials, isAdmi
                   }`}
                 >
                   <div className="flex flex-col h-full relative">
-                    {/* Botões Admin: Posicionados com Z-INDEX ALTÍSSIMO e pointer-events-auto */}
+                    {/* Botões Admin */}
                     {isAdmin && position === "active" && (
                       <div className="absolute top-4 right-4 flex gap-2 z-[150] pointer-events-auto">
                         <button 
@@ -146,7 +235,7 @@ const Testimonials: React.FC<TestimonialsProps> = ({ theme, testimonials, isAdmi
                       </div>
                     )}
 
-                    <div className="relative h-60 overflow-hidden">
+                    <div className="relative h-60 overflow-hidden pointer-events-none">
                       <img 
                         src={testimonial.image || DEFAULT_TESTIMONIAL_IMAGE} 
                         className={`w-full h-full object-cover transition-transform duration-[4000ms] ease-out ${position === 'active' ? 'scale-105' : 'scale-100'}`} 
@@ -161,7 +250,7 @@ const Testimonials: React.FC<TestimonialsProps> = ({ theme, testimonials, isAdmi
                       </div>
                     </div>
 
-                    <div className="p-8 flex flex-col items-center text-center">
+                    <div className="p-8 flex flex-col items-center text-center pointer-events-none">
                       <Quote className="w-8 h-8 text-fuzzi-blue opacity-10 mb-4" />
                       <p className={`text-lg md:text-xl leading-snug italic mb-6 font-medium tracking-tight ${theme === 'dark' ? 'text-slate-200' : 'text-slate-700'}`}>
                         "{testimonial.text}"
@@ -192,30 +281,31 @@ const Testimonials: React.FC<TestimonialsProps> = ({ theme, testimonials, isAdmi
             })}
           </div>
 
-          {testimonials.length > 1 && (
-            <>
-              <button 
-                onClick={handlePrev}
-                className={`absolute left-2 md:-left-12 z-40 p-5 rounded-full border backdrop-blur-2xl transition-all active:scale-90 ${
-                  theme === 'dark' ? 'bg-slate-900/60 border-slate-800 text-white hover:bg-fuzzi-blue' : 'bg-white/60 border-slate-200 text-slate-900 hover:bg-fuzzi-blue hover:text-white shadow-md'
-                }`}
-              >
-                <ChevronLeft className="w-7 h-7" />
-              </button>
-
-              <button 
-                onClick={handleNext}
-                className={`absolute right-2 md:-right-12 z-40 p-5 rounded-full border backdrop-blur-2xl transition-all active:scale-90 ${
-                  theme === 'dark' ? 'bg-slate-900/60 border-slate-800 text-white hover:bg-fuzzi-blue' : 'bg-white/60 border-slate-200 text-slate-900 hover:bg-fuzzi-blue hover:text-white shadow-md'
-                }`}
-              >
-                <ChevronRight className="w-7 h-7" />
-              </button>
-            </>
-          )}
+          {/* SETAS DE NAVEGAÇÃO (Apenas Desktop) */}
+          <button
+            onClick={onPrevClick}
+            className={`hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-40 p-3 rounded-full backdrop-blur-sm transition-all shadow-lg border active:scale-95 -ml-5 lg:-ml-12 ${
+               theme === 'dark' 
+                 ? 'bg-slate-800/50 text-white border-slate-700 hover:bg-fuzzi-blue hover:border-fuzzi-blue' 
+                 : 'bg-white/50 text-fuzzi-blue border-white/50 hover:bg-fuzzi-blue hover:text-white'
+            }`}
+          >
+            <ChevronLeft className="w-8 h-8" />
+          </button>
+          
+          <button
+            onClick={onNextClick}
+            className={`hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-40 p-3 rounded-full backdrop-blur-sm transition-all shadow-lg border active:scale-95 -mr-5 lg:-mr-12 ${
+               theme === 'dark' 
+                 ? 'bg-slate-800/50 text-white border-slate-700 hover:bg-fuzzi-blue hover:border-fuzzi-blue' 
+                 : 'bg-white/50 text-fuzzi-blue border-white/50 hover:bg-fuzzi-blue hover:text-white'
+            }`}
+          >
+            <ChevronRight className="w-8 h-8" />
+          </button>
         </div>
 
-        <div className="mt-12 max-w-xs mx-auto space-y-4">
+        <div className="mt-8 md:mt-12 max-w-xs mx-auto space-y-4">
           <div className={`h-1 w-full rounded-full overflow-hidden transition-theme ${theme === 'dark' ? 'bg-slate-800' : 'bg-slate-100'}`}>
             <div 
               className="h-full bg-fuzzi-blue transition-all duration-300 ease-linear shadow-[0_0_10px_rgba(0,207,255,0.4)]"
