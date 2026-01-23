@@ -64,8 +64,8 @@ const Hero: React.FC<HeroProps> = ({ theme, setView, heroImage, isAdmin, onHeroI
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Resolução otimizada para o Hero (1000px é suficiente para qualquer celular)
-    canvas.width = 1000;
+    // Resolução otimizada para o Hero Horizontal (1.6:1)
+    canvas.width = 1600;
     canvas.height = 1000;
 
     const viewer = viewerRef.current.getBoundingClientRect();
@@ -80,18 +80,17 @@ const Hero: React.FC<HeroProps> = ({ theme, setView, heroImage, isAdmin, onHeroI
     const cropH = viewer.height * scaleY;
 
     ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'medium';
+    ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(imgRef.current, cropX, cropY, cropW, cropH, 0, 0, canvas.width, canvas.height);
 
-    // Qualidade 0.6 reduz drasticamente o peso da string Base64 no celular
-    const finalData = canvas.toDataURL('image/jpeg', 0.6);
+    const finalData = canvas.toDataURL('image/jpeg', 0.8);
     onHeroImageChange(finalData);
     setIsCropping(false);
     setTempImage(null);
   };
 
   return (
-    <div className="py-8 md:py-20 flex flex-col lg:flex-row items-center gap-8 lg:gap-20">
+    <div className="py-8 md:py-20 flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
       <div className="flex-1 text-center lg:text-left animate-in slide-in-from-left-8 duration-700">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-fuzzi-blue/10 text-fuzzi-blue text-[10px] font-black uppercase tracking-[0.2em] mb-6 md:mb-8 mx-auto lg:mx-0">
           <span className="relative flex h-2 w-2">
@@ -100,7 +99,7 @@ const Hero: React.FC<HeroProps> = ({ theme, setView, heroImage, isAdmin, onHeroI
           </span>
           Qualidade em cada detalhe
         </div>
-        <h1 className={`text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-extrabold mb-6 leading-[1.05] tracking-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+        <h1 className={`text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-extrabold mb-6 leading-[1.05] tracking-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
           Design & Qualidade <br />
           em <span className="text-fuzzi-blue">Esquadrias</span>
         </h1>
@@ -109,14 +108,15 @@ const Hero: React.FC<HeroProps> = ({ theme, setView, heroImage, isAdmin, onHeroI
         </p>
       </div>
 
-      <div className="flex-1 w-full relative group mx-auto">
-        <div className={`relative overflow-hidden rounded-[2.5rem] md:rounded-[3rem] transition-all duration-700 ease-out ${
-          theme === 'dark' ? 'shadow-[0_30px_100px_-20px_rgba(0,0,200,0.4)]' : 'shadow-2xl'
+      <div className="flex-[1.2] w-full relative group mx-auto">
+        <div className={`relative overflow-hidden rounded-[2.5rem] md:rounded-[4rem] transition-all duration-700 ease-out ${
+          theme === 'dark' ? 'shadow-[0_30px_100px_-20px_rgba(0,100,255,0.3)]' : 'shadow-2xl'
         }`}>
+          {/* FORMATO RETANGULAR HORIZONTAL (1.6:1) */}
           <img 
-            key={heroImage.substring(0, 100)} // Key instável para forçar re-render parcial no celular
+            key={heroImage.substring(0, 100)} 
             src={heroImage} 
-            className="w-full aspect-square object-cover"
+            className="w-full aspect-[1.6/1] object-cover"
           />
           {isAdmin && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -129,14 +129,18 @@ const Hero: React.FC<HeroProps> = ({ theme, setView, heroImage, isAdmin, onHeroI
 
       {isCropping && tempImage && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
-          <div className={`w-full max-w-lg rounded-[3rem] overflow-hidden ${theme === 'dark' ? 'bg-slate-900 border border-slate-800' : 'bg-white'}`}>
+          <div className={`w-full max-w-2xl rounded-[3rem] overflow-hidden ${theme === 'dark' ? 'bg-slate-900 border border-slate-800' : 'bg-white'}`}>
             <div className="p-6 border-b flex items-center justify-between"><h3 className="font-black">Ajustar Capa</h3><button onClick={() => setIsCropping(false)}><X /></button></div>
             <div className="p-8 space-y-6">
-              <div ref={viewerRef} className="relative w-full aspect-square rounded-[2rem] overflow-hidden bg-black border-4 border-fuzzi-blue touch-none" onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={stopDragging} onTouchStart={onMouseDown} onTouchMove={onMouseMove} onTouchEnd={stopDragging}>
+              {/* VIEWER EM FORMATO RETANGULAR */}
+              <div ref={viewerRef} className="relative w-full aspect-[1.6/1] rounded-[2rem] overflow-hidden bg-black border-4 border-fuzzi-blue touch-none" onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={stopDragging} onTouchStart={onMouseDown} onTouchMove={onMouseMove} onTouchEnd={stopDragging}>
                 <img ref={imgRef} src={tempImage} className="absolute max-w-none pointer-events-none" style={{ transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`, left: '50%', top: '50%', width: '100%', height: 'auto', marginLeft: '-50%', marginTop: '-50%' }} />
               </div>
-              <input type="range" min="0.5" max="4" step="0.01" value={zoom} onChange={(e) => setZoom(parseFloat(e.target.value))} className="w-full accent-fuzzi-blue" />
-              <button onClick={handleApplyCrop} className="w-full py-4 bg-fuzzi-blue text-white font-black rounded-2xl shadow-xl">Salvar Alteração</button>
+              <div className="flex items-center gap-4">
+                <ZoomIn className="w-5 h-5 opacity-40" />
+                <input type="range" min="0.5" max="4" step="0.01" value={zoom} onChange={(e) => setZoom(parseFloat(e.target.value))} className="w-full accent-fuzzi-blue h-1.5 rounded-lg appearance-none bg-slate-200 dark:bg-slate-700" />
+              </div>
+              <button onClick={handleApplyCrop} className="w-full py-5 bg-fuzzi-blue text-white font-black rounded-2xl shadow-xl hover:scale-[1.02] transition-transform">Salvar Alteração</button>
             </div>
           </div>
         </div>

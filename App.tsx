@@ -14,7 +14,8 @@ import Features from './components/Features';
 import ProductDetail from './components/ProductDetail'; 
 import ProductCard from './components/ProductCard'; 
 import ConfirmModal from './components/ConfirmModal'; 
-import { FileText, Loader2 } from 'lucide-react';
+import WhatsAppIcon from './components/WhatsAppIcon';
+import { FileText, Loader2, ArrowRight } from 'lucide-react';
 
 const DEFAULT_HERO_IMAGE = "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1200";
 
@@ -179,6 +180,7 @@ const App: React.FC = () => {
   };
 
   const mainCatalog = pdfCatalogs[0] || INITIAL_PDF_CATALOGS[0];
+  const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER.replace(/\D/g, '')}?text=${encodeURIComponent("Olá! Gostaria de falar com um vendedor sobre os produtos da Fuzzi.")}`;
 
   return (
     <div className={`min-h-screen transition-theme flex flex-col overflow-x-hidden ${theme === 'dark' ? 'bg-slate-950 text-white' : 'bg-white text-slate-900'}`}>
@@ -208,11 +210,15 @@ const App: React.FC = () => {
       )}
 
       <main className="flex-grow">
-        <section id="inicio" className="container mx-auto px-4 pt-24 min-h-[90vh] md:min-h-screen">
+        <section id="inicio" className="container mx-auto px-4 pt-24 min-h-[90vh] md:min-h-screen scroll-mt-24">
           <Hero theme={theme} setView={setView} heroImage={heroImage} isAdmin={isAdminAuthenticated} onHeroImageChange={handleHeroChange} />
         </section>
-        <section id="diferenciais" className="py-10 md:py-24"><Features theme={theme} /></section>
-        <section id="produtos" className="container mx-auto px-4 py-10 md:py-20">
+        
+        <section id="diferenciais" className="py-10 md:py-24 scroll-mt-24">
+          <Features theme={theme} />
+        </section>
+        
+        <section id="produtos" className="container mx-auto px-4 py-10 md:py-20 scroll-mt-24">
           <div className="mb-12 text-center md:text-left">
             <span className="text-fuzzi-blue font-black uppercase tracking-[0.3em] text-[10px] block mb-4">Nossa Vitrine</span>
             <h2 className="text-4xl md:text-6xl font-black">Projetos de <span className="text-fuzzi-blue">Alto Padrão</span></h2>
@@ -223,24 +229,67 @@ const App: React.FC = () => {
             ))}
           </div>
         </section>
-        <section id="catalogo" className="py-10 md:py-24">
+
+        <section id="catalogo" className="py-10 md:py-24 scroll-mt-24">
           <div className="container mx-auto px-4">
-            <div className={`relative overflow-hidden rounded-[3rem] border ${theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100 shadow-xl'}`}>
-              <div className="grid grid-cols-1 lg:grid-cols-2 items-center">
-                <div className="p-8 md:p-16 space-y-6">
-                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-fuzzi-blue text-white text-[10px] font-black uppercase rounded-full"><FileText className="w-4 h-4"/> Catálogo Técnico</div>
-                  <h2 className="text-3xl md:text-5xl font-black">{mainCatalog?.title}</h2>
-                  <p className="opacity-70">Confira as especificações técnicas e opções de acabamentos.</p>
-                  <div className="flex gap-4">
-                    <a href={mainCatalog?.pdfUrl} target="_blank" className="px-8 py-4 bg-fuzzi-blue text-white font-black rounded-xl shadow-lg">Acessar PDF</a>
+            <div className={`relative overflow-hidden rounded-[2.5rem] md:rounded-[4rem] border shadow-2xl ${theme === 'dark' ? 'bg-[#0a0f1a] border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+              <div className="grid grid-cols-1 lg:grid-cols-2 items-stretch">
+                
+                {/* Lado Esquerdo: Conteúdo */}
+                <div className="p-8 md:p-16 lg:p-24 flex flex-col justify-center space-y-8 md:space-y-10">
+                  <div className="space-y-4">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-fuzzi-blue/20 text-fuzzi-blue text-[10px] font-black uppercase tracking-widest rounded-full border border-fuzzi-blue/20">
+                      <FileText className="w-3.5 h-3.5"/> Catálogo Técnico
+                    </div>
+                    <h2 className={`text-4xl md:text-6xl font-black leading-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+                      {mainCatalog?.title || 'Catálogo de Esquadrias'}
+                    </h2>
+                    <p className={`text-lg md:text-xl font-medium opacity-60 leading-relaxed max-w-md ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>
+                      Confira as especificações técnicas, detalhes construtivos e opções de acabamentos exclusivos.
+                    </p>
+                  </div>
+
+                  {/* Botões */}
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <a 
+                      href={mainCatalog?.pdfUrl} 
+                      target="_blank" 
+                      className="group flex items-center justify-center gap-3 px-8 py-5 bg-fuzzi-blue text-white font-black rounded-2xl shadow-xl shadow-fuzzi-blue/20 hover:scale-105 transition-all active:scale-95 text-sm uppercase tracking-wider"
+                    >
+                      Veja nosso catálogo
+                      <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    </a>
+                    
+                    <a 
+                      href={whatsappUrl}
+                      target="_blank" 
+                      className="flex items-center justify-center gap-3 px-8 py-5 bg-[#25D366] text-white font-black rounded-2xl shadow-xl shadow-[#25D366]/20 hover:scale-105 transition-all active:scale-95 text-sm uppercase tracking-wider"
+                    >
+                      <WhatsAppIcon className="w-5 h-5 fill-white" />
+                      Fale com um vendedor
+                    </a>
                   </div>
                 </div>
-                <div className="hidden lg:block h-full"><img src={mainCatalog?.coverImage} className="w-full h-full object-cover"/></div>
+
+                {/* Lado Direito: Imagem */}
+                <div className="relative min-h-[400px] lg:min-h-full">
+                  <img 
+                    src={mainCatalog?.coverImage || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1200'} 
+                    className="absolute inset-0 w-full h-full object-cover"
+                    alt="Capa do Catálogo"
+                  />
+                  {/* Overlay Gradiente para integração visual */}
+                  <div className={`absolute inset-0 lg:bg-gradient-to-r ${theme === 'dark' ? 'from-[#0a0f1a] via-transparent to-transparent' : 'from-slate-50 via-transparent to-transparent'}`}></div>
+                </div>
+
               </div>
             </div>
           </div>
         </section>
-        <section id="depoimentos" className="py-10"><Testimonials theme={theme} testimonials={testimonials} isAdmin={isAdminAuthenticated} onEdit={(t)=>{setCurrentTestimonial(t);setIsAdminTestimonialOpen(true)}} onDelete={(id)=>setConfirmDelete({isOpen:true, type:'testimonial', id})} /></section>
+
+        <section id="depoimentos" className="py-10 scroll-mt-24">
+          <Testimonials theme={theme} testimonials={testimonials} isAdmin={isAdminAuthenticated} onEdit={(t)=>{setCurrentTestimonial(t);setIsAdminTestimonialOpen(true)}} onDelete={(id)=>setConfirmDelete({isOpen:true, type:'testimonial', id})} />
+        </section>
       </main>
       <Footer theme={theme} isAdmin={isAdminAuthenticated} onAdminToggle={()=>setIsAdminAuthenticated(false)} onLogin={onLoginSuccess} setView={setView} setIsLoginOpen={()=>{}} isLoginOpen={false} />
       {selectedProduct && <ProductDetail product={selectedProduct} theme={theme} onClose={()=>setSelectedProduct(null)} />}
