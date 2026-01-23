@@ -47,7 +47,8 @@ const Footer: React.FC<FooterProps> = ({ theme, isAdmin, onAdminToggle, onLogin,
       setError(false);
     } else {
       setError(true);
-      setTimeout(() => setError(false), 2000);
+      // Mantém o erro visível por 3 segundos para dar tempo de ler
+      setTimeout(() => setError(false), 3000);
     }
   };
 
@@ -94,7 +95,7 @@ const Footer: React.FC<FooterProps> = ({ theme, isAdmin, onAdminToggle, onLogin,
             </div>
           </div>
 
-          {/* 2. Contato (Meio) - Ordem 2 no mobile */}
+          {/* 2. Contato (Meio) */}
           <div className="flex flex-col items-start space-y-4 order-2 lg:order-2">
             <h4 className={`text-[10px] font-black uppercase tracking-widest mb-0 lg:mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
               Fale Conosco
@@ -122,7 +123,7 @@ const Footer: React.FC<FooterProps> = ({ theme, isAdmin, onAdminToggle, onLogin,
             </div>
           </div>
 
-          {/* 3. Navegação (Direita) - Ordem 3 no mobile */}
+          {/* 3. Navegação (Direita) */}
           <div className="flex flex-col items-start order-3 lg:order-3">
             <h4 className={`text-[10px] font-black uppercase tracking-widest mb-4 lg:mb-6 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
               Navegação
@@ -147,6 +148,7 @@ const Footer: React.FC<FooterProps> = ({ theme, isAdmin, onAdminToggle, onLogin,
                         onAdminToggle();
                       } else {
                         setShowPasswordInput(!showPasswordInput);
+                        setError(false);
                       }
                     }}
                     type="button"
@@ -169,21 +171,30 @@ const Footer: React.FC<FooterProps> = ({ theme, isAdmin, onAdminToggle, onLogin,
                         <input 
                           type="password"
                           value={password}
-                          onChange={(e) => setPassword(e.target.value)}
+                          onChange={(e) => {
+                            setPassword(e.target.value);
+                            if (error) setError(false);
+                          }}
                           placeholder="Senha"
                           autoFocus
-                          className={`w-32 px-2 py-1.5 text-xs rounded-lg border outline-none transition-all ${
+                          className={`w-32 px-3 py-2 text-xs rounded-xl border outline-none transition-all ${
                             error 
-                              ? 'border-red-500 bg-red-50/50' 
+                              ? 'border-red-500 bg-red-50/50 ring-4 ring-red-500/10' 
                               : theme === 'dark' 
-                                ? 'bg-slate-900 border-slate-800 text-white' 
-                                : 'bg-white border-slate-200 text-slate-900'
+                                ? 'bg-slate-900 border-slate-800 text-white focus:border-fuzzi-blue' 
+                                : 'bg-white border-slate-200 text-slate-900 focus:border-fuzzi-blue shadow-sm'
                           }`}
                         />
-                        <button type="submit" className="absolute right-1.5 top-1/2 -translate-y-1/2 text-fuzzi-blue hover:scale-110 transition-transform">
-                          <ArrowRight className="w-3.5 h-3.5" />
+                        <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-fuzzi-blue hover:scale-110 transition-transform">
+                          <ArrowRight className="w-4 h-4" />
                         </button>
                       </div>
+                      {error && (
+                        <span className="text-[10px] font-bold text-red-500 animate-pulse flex items-center gap-1">
+                          <span className="w-1 h-1 bg-red-500 rounded-full"></span>
+                          Senha incorreta!
+                        </span>
+                      )}
                     </form>
                   )}
                 </div>

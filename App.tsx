@@ -35,14 +35,12 @@ const App: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null); 
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
 
-  // Estado para controle da exclusão
   const [confirmDelete, setConfirmDelete] = useState<{
     isOpen: boolean;
     type: 'product' | 'testimonial' | null;
     id: string | null;
   }>({ isOpen: false, type: null, id: null });
 
-  // Carregamento Inicial
   useEffect(() => {
     try {
       const savedProducts = localStorage.getItem('fuzzi_products');
@@ -70,7 +68,6 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // Persistência Automática
   useEffect(() => {
     const saveData = () => {
       try {
@@ -201,7 +198,7 @@ const App: React.FC = () => {
             <Hero theme={theme} setView={setView} heroImage={heroImage} isAdmin={isAdminAuthenticated} onHeroImageChange={setHeroImage} />
           </section>
 
-          <section id="diferenciais" className="flex flex-col justify-center bg-fuzzi-blue/5 dark:bg-slate-900/20 py-10 md:py-20">
+          <section id="diferenciais" className={`flex flex-col justify-center py-10 md:py-24`}>
             <Features theme={theme} />
           </section>
           
@@ -232,13 +229,14 @@ const App: React.FC = () => {
             </div>
           </section>
 
-          <section id="catalogo" className="flex flex-col justify-center py-10 md:py-24 relative overflow-hidden bg-fuzzi-blue/5 dark:bg-slate-900/20">
+          <section id="catalogo" className="flex flex-col justify-center py-10 md:py-24 relative overflow-hidden">
               <div className="container mx-auto px-4">
-                <div className={`relative overflow-hidden rounded-[2.5rem] lg:rounded-[4rem] border transition-all ${
-                  theme === 'dark' ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-fuzzi-blue/10 shadow-2xl shadow-fuzzi-blue/5'
+                <div className={`relative overflow-hidden rounded-[2.5rem] lg:rounded-[4rem] border transition-all duration-500 ${
+                  theme === 'dark' 
+                    ? 'bg-slate-900/50 border-slate-800' 
+                    : 'bg-white border-slate-100 shadow-[0_30px_100px_-20px_rgba(0,207,255,0.15)]'
                 }`}>
                   
-                  {/* IMAGEM DE FUNDO (Apenas Mobile) */}
                   <div className="absolute inset-0 lg:hidden">
                     <img src={mainCatalog?.coverImage} alt="" className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-slate-950/85 backdrop-blur-[2px]"></div>

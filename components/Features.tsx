@@ -53,36 +53,36 @@ const Features: React.FC<FeaturesProps> = ({ theme }) => {
         <h2 className={`text-3xl md:text-5xl font-black mb-4 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
           Por que escolher a <br className="md:hidden" /> <span className="text-fuzzi-blue">Fuzzi?</span>
         </h2>
-        <p className={`max-w-2xl mx-auto text-sm md:text-xl ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
+        <p className={`max-w-2xl mx-auto text-sm md:text-xl ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
           Combinamos tradição em esquadrias com as tecnologias mais modernas do mercado para entregar excelência.
         </p>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
         {FEATURES.map((feature, index) => (
           <div 
             key={index}
-            className={`group p-5 md:p-8 rounded-3xl md:rounded-[2rem] border transition-[transform,border-color,background-color] duration-300 will-change-transform hover:-translate-y-1 flex flex-col ${
+            className={`group p-6 md:p-10 rounded-3xl md:rounded-[2.5rem] border transition-all duration-500 will-change-transform hover:-translate-y-2 flex flex-col ${
               theme === 'dark' 
-                ? 'bg-slate-900/50 border-slate-800 hover:border-fuzzi-blue/50 hover:bg-slate-900' 
-                : 'bg-white border-fuzzi-blue/5 hover:border-fuzzi-blue/20 shadow-sm hover:shadow-xl hover:shadow-fuzzi-blue/5'
+                ? 'bg-slate-900/50 border-slate-800 hover:border-fuzzi-blue/50 hover:bg-slate-900 shadow-2xl shadow-black/20' 
+                : 'bg-white border-transparent shadow-[0_15px_40px_-12px_rgba(0,0,0,0.06)] hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.12)] text-slate-900'
             }`}
           >
-            <div className={`w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl flex items-center justify-center mb-3 md:mb-6 transition-transform duration-500 group-hover:rotate-6 will-change-transform ${
-              theme === 'dark' ? 'bg-fuzzi-blue/10 text-fuzzi-blue' : 'bg-fuzzi-blue/5 text-fuzzi-blue'
+            <div className={`w-12 h-12 md:w-16 md:h-16 rounded-2xl md:rounded-[1.25rem] flex items-center justify-center mb-5 md:mb-8 transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 will-change-transform ${
+              theme === 'dark' ? 'bg-fuzzi-blue/10 text-fuzzi-blue' : 'bg-fuzzi-blue/10 text-fuzzi-blue shadow-lg shadow-fuzzi-blue/10'
             }`}>
-              <feature.icon className="w-5 h-5 md:w-7 md:h-7" />
+              <feature.icon className="w-6 h-6 md:w-8 md:h-8" />
             </div>
             
-            <h3 className={`text-sm md:text-2xl font-black mb-2 md:mb-3 leading-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+            <h3 className={`text-base md:text-2xl font-black mb-3 md:mb-4 leading-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
               {feature.title}
             </h3>
             
-            <p className={`leading-relaxed text-xs md:text-lg flex-grow ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
+            <p className={`leading-relaxed text-xs md:text-lg flex-grow font-medium ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
               {feature.description}
             </p>
             
-            <div className={`mt-4 md:mt-6 h-1 w-8 group-hover:w-12 transition-[width] duration-300 rounded-full bg-fuzzi-blue`}></div>
+            <div className={`mt-6 md:mt-8 h-1 w-8 group-hover:w-16 transition-[width] duration-500 rounded-full bg-fuzzi-blue`}></div>
           </div>
         ))}
       </div>
