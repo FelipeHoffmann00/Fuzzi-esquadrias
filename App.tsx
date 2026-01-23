@@ -43,27 +43,17 @@ const App: React.FC = () => {
     id: string | null;
   }>({ isOpen: false, type: null, id: null });
 
-  // Carregamento de dados do Supabase
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      // Buscar Produtos
-      const { data: prods, error: prodErr } = await supabase
-        .from('products')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const { data: prods } = await supabase.from('products').select('*').order('created_at', { ascending: false });
       if (prods && prods.length > 0) setProducts(prods);
       else setProducts(INITIAL_PRODUCTS);
 
-      // Buscar Depoimentos
-      const { data: tests, error: testErr } = await supabase
-        .from('testimonials')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const { data: tests } = await supabase.from('testimonials').select('*').order('created_at', { ascending: false });
       if (tests && tests.length > 0) setTestimonials(tests);
       else setTestimonials(INITIAL_TESTIMONIALS);
 
-      // Buscar Configurações (Hero e Catálogo)
       const { data: config } = await supabase.from('site_config').select('*');
       const heroCfg = config?.find(c => c.key === 'hero_image');
       const pdfCfg = config?.find(c => c.key === 'catalog');
@@ -73,7 +63,7 @@ const App: React.FC = () => {
       else setPdfCatalogs(INITIAL_PDF_CATALOGS);
 
     } catch (e) {
-      console.error("Erro ao carregar dados do Supabase:", e);
+      console.error("Erro ao carregar dados:", e);
     } finally {
       setIsLoading(false);
     }
@@ -86,20 +76,32 @@ const App: React.FC = () => {
   }, [fetchData]);
 
   const handleHeroChange = async (base64OrUrl: string) => {
-    const publicUrl = await uploadImage(base64OrUrl, 'hero');
-    setHeroImage(publicUrl);
-    await supabase.from('site_config').upsert({ key: 'hero_image', value: { url: publicUrl } });
+    setIsLoading(true);
+    try {
+      const publicUrl = await uploadImage(base64OrUrl, 'hero');
+      setHeroImage(publicUrl);
+      await supabase.from('site_config').upsert({ key: 'hero_image', value: { url: publicUrl } });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSaveProduct = async (product: Product) => {
     setIsLoading(true);
     try {
-      // Upload de imagens novas (as que são base64)
       const uploadedImages = await Promise.all(
         product.images.map(img => img.startsWith('data:') ? uploadImage(img, 'products') : img)
       );
 
-      const productToSave = { ...product, images: uploadedImages };
+      const productToSave = { 
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        category: product.category,
+        images: uploadedImages,
+        featured: product.featured,
+        created_at: new Date().toISOString()
+      };
       
       const { error } = await supabase.from('products').upsert(productToSave);
       if (error) throw error;
@@ -107,8 +109,8 @@ const App: React.FC = () => {
       await fetchData();
       setIsAdminProductOpen(false);
       setIsEditing(false);
-    } catch (e) {
-      alert("Erro ao salvar produto no banco de dados.");
+    } catch (e: any) {
+      alert("Erro ao salvar: " + e.message);
     } finally {
       setIsLoading(false);
     }
@@ -134,7 +136,11 @@ const App: React.FC = () => {
     setIsLoading(true);
     try {
       const imageUrl = testimonial.image.startsWith('data:') ? await uploadImage(testimonial.image, 'testimonials') : testimonial.image;
-      const testimonialToSave = { ...testimonial, image: imageUrl };
+      const testimonialToSave = { 
+        ...testimonial, 
+        image: imageUrl,
+        created_at: new Date().toISOString()
+      };
 
       await supabase.from('testimonials').upsert(testimonialToSave);
       await fetchData();
@@ -151,8 +157,11 @@ const App: React.FC = () => {
     setIsLoading(true);
     try {
       const table = confirmDelete.type === 'product' ? 'products' : 'testimonials';
-      await supabase.from(table).delete().eq('id', confirmDelete.id);
+      const { error } = await supabase.from(table).delete().eq('id', confirmDelete.id);
+      if (error) throw error;
       await fetchData();
+    } catch (e: any) {
+      alert("Erro ao deletar: " + e.message);
     } finally {
       setIsLoading(false);
       setConfirmDelete({ isOpen: false, type: null, id: null });
@@ -182,10 +191,18 @@ const App: React.FC = () => {
       />
 
       {isLoading && (
-        <div className="fixed inset-0 z-[200] bg-black/20 backdrop-blur-sm flex items-center justify-center">
-          <div className="bg-white dark:bg-slate-900 p-8 rounded-[2rem] shadow-2xl flex flex-col items-center gap-4">
-            <Loader2 className="w-12 h-12 text-fuzzi-blue animate-spin" />
-            <span className="font-black text-xs uppercase tracking-widest text-fuzzi-blue">Sincronizando...</span>
+        <div className="fixed inset-0 z-[200] bg-black/40 backdrop-blur-md flex items-center justify-center">
+          <div className="bg-white dark:bg-slate-900 p-10 rounded-[3rem] shadow-2xl flex flex-col items-center gap-6 animate-in zoom-in-95">
+            <div className="relative">
+              <Loader2 className="w-16 h-16 text-fuzzi-blue animate-spin" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-2 h-2 bg-fuzzi-blue rounded-full animate-ping"></div>
+              </div>
+            </div>
+            <div className="text-center">
+              <span className="font-black text-[10px] uppercase tracking-[0.3em] text-fuzzi-blue block">Nuvem Fuzzi</span>
+              <span className="text-sm font-bold opacity-60">Sincronizando dados...</span>
+            </div>
           </div>
         </div>
       )}
