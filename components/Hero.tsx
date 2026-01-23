@@ -38,7 +38,7 @@ const Hero: React.FC<HeroProps> = ({ theme, setView, heroImage, isAdmin, onHeroI
       setPosition({ x: 0, y: 0 });
     };
     reader.readAsDataURL(file);
-    e.target.value = ''; // Reset for same file re-selection
+    e.target.value = ''; 
   };
 
   const onMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
@@ -83,7 +83,8 @@ const Hero: React.FC<HeroProps> = ({ theme, setView, heroImage, isAdmin, onHeroI
     ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(imgRef.current, cropX, cropY, cropW, cropH, 0, 0, canvas.width, canvas.height);
 
-    onHeroImageChange(canvas.toDataURL('image/jpeg', 0.9));
+    // Otimizado para 0.7 para economizar espaço no mobile sem perder qualidade
+    onHeroImageChange(canvas.toDataURL('image/jpeg', 0.7));
     setIsCropping(false);
     setTempImage(null);
   };
@@ -123,6 +124,7 @@ const Hero: React.FC<HeroProps> = ({ theme, setView, heroImage, isAdmin, onHeroI
         } group-hover:scale-[1.01]`}>
           
           <img 
+            key={heroImage}
             src={heroImage} 
             alt="Fuzzi Esquadrias Showroom" 
             className={`w-full aspect-square object-cover transition-all duration-1000 ease-out ${isProcessing ? 'opacity-50 scale-105' : 'opacity-100 scale-100 group-hover:scale-110'}`}

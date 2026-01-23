@@ -6,6 +6,7 @@ import Header from './components/Header';
 import Hero from './components/Hero';
 import AdminModal from './components/AdminModal';
 import TestimonialModal from './components/TestimonialModal';
+import CatalogPDFModal from './components/CatalogPDFModal';
 import Footer from './components/Footer';
 import Testimonials from './components/Testimonials';
 import Features from './components/Features';
@@ -27,6 +28,7 @@ const App: React.FC = () => {
   
   const [isAdminProductOpen, setIsAdminProductOpen] = useState(false);
   const [isAdminTestimonialOpen, setIsAdminTestimonialOpen] = useState(false);
+  const [isAdminPDFOpen, setIsAdminPDFOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   
@@ -70,6 +72,7 @@ const App: React.FC = () => {
       try {
         localStorage.setItem('fuzzi_products', JSON.stringify(products));
         localStorage.setItem('fuzzi_testimonials', JSON.stringify(testimonials));
+        localStorage.setItem('fuzzi_pdfs', JSON.stringify(pdfCatalogs));
         localStorage.setItem('fuzzi_hero_image', heroImage);
       } catch (e) {
         console.error("Erro ao salvar dados localmente:", e);
@@ -77,7 +80,7 @@ const App: React.FC = () => {
     };
     const timeout = setTimeout(saveData, 500);
     return () => clearTimeout(timeout);
-  }, [products, testimonials, heroImage]);
+  }, [products, testimonials, pdfCatalogs, heroImage]);
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -113,6 +116,11 @@ const App: React.FC = () => {
     });
     setIsAdminProductOpen(false);
     setIsEditing(false);
+  };
+
+  const handleSavePDF = (pdf: CatalogPDF) => {
+    setPdfCatalogs([pdf]);
+    setIsAdminPDFOpen(false);
   };
 
   const handleDeleteProductRequest = (id: string) => {
@@ -172,7 +180,7 @@ const App: React.FC = () => {
         setView={setView}
         toggleTheme={toggleTheme} 
         openAdminProduct={() => { setCurrentProduct(null); setIsEditing(false); setIsAdminProductOpen(true); }} 
-        openAdminPDF={() => {}} 
+        openAdminPDF={() => setIsAdminPDFOpen(true)} 
         openAdminTestimonial={() => { 
           if (testimonials.length >= 5) {
             alert("Limite atingido! Remova um antigo para adicionar novo.");
@@ -274,6 +282,7 @@ const App: React.FC = () => {
       {selectedProduct && <ProductDetail product={selectedProduct} theme={theme} onClose={() => setSelectedProduct(null)} />}
       {isAdminProductOpen && <AdminModal theme={theme} onClose={() => setIsAdminProductOpen(false)} onSave={handleSaveProduct} editProduct={currentProduct} isEditing={isEditing} />}
       {isAdminTestimonialOpen && <TestimonialModal theme={theme} onClose={() => setIsAdminTestimonialOpen(false)} onSave={handleSaveTestimonial} editTestimonial={currentTestimonial} />}
+      {isAdminPDFOpen && <CatalogPDFModal theme={theme} onClose={() => setIsAdminPDFOpen(false)} onSave={handleSavePDF} editPDF={mainCatalog} />}
       <ConfirmModal theme={theme} isOpen={confirmDelete.isOpen} title="Tem certeza?" message={confirmDelete.type === 'product' ? "Esta ação excluirá o produto permanentemente. Isso não pode ser desfeito." : "Esta ação excluirá o depoimento permanentemente. Isso não pode ser desfeito."} onConfirm={executeDelete} onCancel={() => setConfirmDelete({ isOpen: false, type: null, id: null })} />
     </div>
   );

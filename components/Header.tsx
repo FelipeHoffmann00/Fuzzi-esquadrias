@@ -15,7 +15,7 @@ interface HeaderProps {
   testimonialsCount: number;
 }
 
-const Header: React.FC<HeaderProps> = ({ theme, view, setView, toggleTheme, openAdminProduct, openAdminTestimonial, isAdmin, testimonialsCount }) => {
+const Header: React.FC<HeaderProps> = ({ theme, view, setView, toggleTheme, openAdminProduct, openAdminPDF, openAdminTestimonial, isAdmin, testimonialsCount }) => {
   const [isNewMenuOpen, setIsNewMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const LOGO_URL = "https://i.imgur.com/3AIeDRi.png";
@@ -102,15 +102,18 @@ const Header: React.FC<HeaderProps> = ({ theme, view, setView, toggleTheme, open
           }`} ref={menuRef}>
             <button onClick={() => setIsNewMenuOpen(!isNewMenuOpen)} className="flex items-center gap-2 md:gap-3 px-3 py-2 md:px-6 md:py-3.5 rounded-xl md:rounded-2xl text-xs font-black bg-green-600 text-white hover:bg-green-700 transition-all shadow-xl active:scale-95 whitespace-nowrap">
               <PlusCircle className="w-5 h-5" />
-              <span className="inline">NOVO</span>
+              <span className="inline">GERENCIAR</span>
               <ChevronDown className={`w-3 h-3 md:w-4 md:h-4 transition-transform duration-300 ${isNewMenuOpen ? 'rotate-180' : ''}`} />
             </button>
             
             {isNewMenuOpen && isAdmin && (
               <div className={`absolute right-0 mt-3 w-64 rounded-[2rem] shadow-2xl border animate-in fade-in zoom-in-95 duration-300 overflow-hidden z-50 ${theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-blue-50'}`}>
                 <div className="p-3 space-y-1.5">
-                  <button onClick={() => { openAdminProduct(); setIsNewMenuOpen(false); }} className={`w-full flex items-center gap-4 px-5 py-4 text-sm font-bold text-left rounded-2xl transition-all hover:bg-green-600 hover:text-white ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
+                  <button onClick={() => { openAdminProduct(); setIsNewMenuOpen(false); }} className={`w-full flex items-center gap-4 px-5 py-4 text-sm font-bold text-left rounded-2xl transition-all hover:bg-fuzzi-blue hover:text-white ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
                     <ShoppingCart className="w-5 h-5 opacity-70" /> Novo Destaque
+                  </button>
+                  <button onClick={() => { openAdminPDF(); setIsNewMenuOpen(false); }} className={`w-full flex items-center gap-4 px-5 py-4 text-sm font-bold text-left rounded-2xl transition-all hover:bg-fuzzi-blue hover:text-white ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
+                    <FileText className="w-5 h-5 opacity-70" /> Editar Catálogo
                   </button>
                   <button 
                     onClick={() => { 
@@ -124,7 +127,7 @@ const Header: React.FC<HeaderProps> = ({ theme, view, setView, toggleTheme, open
                     className={`w-full flex items-center gap-4 px-5 py-4 text-sm font-bold text-left rounded-2xl transition-all ${
                       isTestimonialLimitReached 
                         ? 'opacity-50 cursor-not-allowed bg-slate-100 dark:bg-slate-800 text-slate-400' 
-                        : `hover:bg-green-600 hover:text-white ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`
+                        : `hover:bg-fuzzi-blue hover:text-white ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`
                     }`}
                   >
                     <MessageSquare className="w-5 h-5 opacity-70" /> 
