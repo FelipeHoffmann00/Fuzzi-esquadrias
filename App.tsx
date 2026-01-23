@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Product, Testimonial, Theme, View, CatalogPDF } from './types';
 import { INITIAL_PRODUCTS, INITIAL_TESTIMONIALS, INITIAL_PDF_CATALOGS, WHATSAPP_NUMBER } from './constants';
 import Header from './components/Header';
@@ -43,6 +43,7 @@ const App: React.FC = () => {
     id: string | null;
   }>({ isOpen: false, type: null, id: null });
 
+  // Carregamento Inicial
   useEffect(() => {
     try {
       const savedProducts = localStorage.getItem('fuzzi_products');
@@ -60,27 +61,68 @@ const App: React.FC = () => {
       const savedTheme = localStorage.getItem('fuzzi_theme') as Theme;
       if (savedTheme) setTheme(savedTheme);
     } catch (e) {
-      console.warn("Erro ao carregar dados. Iniciando com dados padrão.", e);
+      console.warn("Erro ao carregar dados.", e);
       setProducts(INITIAL_PRODUCTS);
       setTestimonials(INITIAL_TESTIMONIALS);
       setPdfCatalogs(INITIAL_PDF_CATALOGS);
     }
   }, []);
 
-  useEffect(() => {
-    const saveData = () => {
-      try {
-        localStorage.setItem('fuzzi_products', JSON.stringify(products));
-        localStorage.setItem('fuzzi_testimonials', JSON.stringify(testimonials));
-        localStorage.setItem('fuzzi_pdfs', JSON.stringify(pdfCatalogs));
-        localStorage.setItem('fuzzi_hero_image', heroImage);
-      } catch (e) {
-        console.error("Erro ao salvar dados localmente:", e);
-      }
-    };
-    const timeout = setTimeout(saveData, 500);
-    return () => clearTimeout(timeout);
-  }, [products, testimonials, pdfCatalogs, heroImage]);
+  // Função de salvamento imediato para evitar perdas
+  const persistData = useCallback((key: string, data: any) => {
+    try {
+      localStorage.setItem(key, typeof data === 'string' ? data : JSON.stringify(data));
+    } catch (e) {
+      console.error("Erro Crítico de Armazenamento: LocalStorage cheio.", e);
+      alert("A memória do navegador está cheia. Tente remover produtos antigos ou usar fotos menores.");
+    }
+  }, []);
+
+  const handleHeroChange = (imageUrl: string) => {
+    setHeroImage(imageUrl);
+    persistData('fuzzi_hero_image', imageUrl);
+  };
+
+  const handleSaveProduct = (product: Product) => {
+    const newProducts = products.find(p => p.id === product.id)
+      ? products.map(p => p.id === product.id ? product : p)
+      : [product, ...products];
+    
+    setProducts(newProducts);
+    persistData('fuzzi_products', newProducts);
+    setIsAdminProductOpen(false);
+    setIsEditing(false);
+  };
+
+  const handleSavePDF = (pdf: CatalogPDF) => {
+    const newPDFs = [pdf];
+    setPdfCatalogs(newPDFs);
+    persistData('fuzzi_pdfs', newPDFs);
+    setIsAdminPDFOpen(false);
+  };
+
+  const handleSaveTestimonial = (testimonial: Testimonial) => {
+    const newTestimonials = testimonials.find(t => t.id === testimonial.id)
+      ? testimonials.map(t => t.id === testimonial.id ? testimonial : t)
+      : [testimonial, ...testimonials].slice(0, 5);
+    
+    setTestimonials(newTestimonials);
+    persistData('fuzzi_testimonials', newTestimonials);
+    setIsAdminTestimonialOpen(false);
+  };
+
+  const executeDelete = () => {
+    if (confirmDelete.type === 'product' && confirmDelete.id) {
+      const newProducts = products.filter(p => p.id !== confirmDelete.id);
+      setProducts(newProducts);
+      persistData('fuzzi_products', newProducts);
+    } else if (confirmDelete.type === 'testimonial' && confirmDelete.id) {
+      const newTestimonials = testimonials.filter(t => t.id !== confirmDelete.id);
+      setTestimonials(newTestimonials);
+      persistData('fuzzi_testimonials', newTestimonials);
+    }
+    setConfirmDelete({ isOpen: false, type: null, id: null });
+  };
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -88,202 +130,63 @@ const App: React.FC = () => {
     localStorage.setItem('fuzzi_theme', newTheme);
   };
 
-  const handleAdminToggle = () => {
-    setIsAdminAuthenticated(false);
-  };
-
   const onLoginSuccess = (password: string) => {
-    if (password === '123') {
-      setIsAdminAuthenticated(true);
-    }
-  };
-
-  const handleSaveProduct = (product: Product) => {
-    if (!product.featured) {
-      const originalProduct = products.find(p => p.id === product.id);
-      if (originalProduct?.featured) {
-        const featuredCount = products.filter(p => p.featured).length;
-        if (featuredCount <= 1) {
-          alert("A vitrine precisa de pelo menos um destaque. Marque outro produto como destaque antes de remover este.");
-          return;
-        }
-      }
-    }
-
-    setProducts(prev => {
-      const exists = prev.find(p => p.id === product.id);
-      return exists ? prev.map(p => p.id === product.id ? product : p) : [product, ...prev];
-    });
-    setIsAdminProductOpen(false);
-    setIsEditing(false);
-  };
-
-  const handleSavePDF = (pdf: CatalogPDF) => {
-    setPdfCatalogs([pdf]);
-    setIsAdminPDFOpen(false);
-  };
-
-  const handleDeleteProductRequest = (id: string) => {
-    const productToDelete = products.find(p => p.id === id);
-    const featuredCount = products.filter(p => p.featured).length;
-    
-    if (productToDelete?.featured && featuredCount <= 1) {
-        alert("Este é o único produto em destaque. A vitrine não pode ficar vazia.");
-        return;
-    }
-
-    setConfirmDelete({ isOpen: true, type: 'product', id });
-  };
-
-  const handleSaveTestimonial = (testimonial: Testimonial) => {
-    setTestimonials(prev => {
-      const exists = prev.find(t => t.id === testimonial.id);
-      if (!exists && prev.length >= 5) {
-        alert("Limite atingido! Máximo 5 depoimentos.");
-        return prev;
-      }
-      return exists ? prev.map(t => t.id === testimonial.id ? testimonial : t) : [testimonial, ...prev];
-    });
-    setIsAdminTestimonialOpen(false);
-  };
-
-  const handleDeleteTestimonialRequest = (id: string) => {
-    if (testimonials.length <= 1) {
-      alert("A vitrine precisa de pelo menos um depoimento.");
-      return;
-    }
-    setConfirmDelete({ isOpen: true, type: 'testimonial', id });
-  };
-
-  const executeDelete = () => {
-    if (confirmDelete.type === 'product' && confirmDelete.id) {
-      setProducts(prev => prev.filter(p => p.id !== confirmDelete.id));
-      if (selectedProduct?.id === confirmDelete.id) {
-        setSelectedProduct(null);
-      }
-    } else if (confirmDelete.type === 'testimonial' && confirmDelete.id) {
-      setTestimonials(prev => prev.filter(t => t.id !== confirmDelete.id));
-    }
-    
-    setConfirmDelete({ isOpen: false, type: null, id: null });
+    if (password === '123') setIsAdminAuthenticated(true);
   };
 
   const mainCatalog = pdfCatalogs[0] || INITIAL_PDF_CATALOGS[0];
   const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER.replace(/\D/g, '')}`;
-  const featuredCount = products.filter(p => p.featured).length;
 
   return (
     <div className={`min-h-screen transition-theme flex flex-col overflow-x-hidden ${theme === 'dark' ? 'bg-slate-950 text-white' : 'bg-white text-slate-900'}`}>
       <Header 
-        theme={theme} 
-        view={view}
-        setView={setView}
-        toggleTheme={toggleTheme} 
+        theme={theme} view={view} setView={setView} toggleTheme={toggleTheme} 
         openAdminProduct={() => { setCurrentProduct(null); setIsEditing(false); setIsAdminProductOpen(true); }} 
         openAdminPDF={() => setIsAdminPDFOpen(true)} 
-        openAdminTestimonial={() => { 
-          if (testimonials.length >= 5) {
-            alert("Limite atingido! Remova um antigo para adicionar novo.");
-            return;
-          }
-          setCurrentTestimonial(null); 
-          setIsAdminTestimonialOpen(true); 
-        }}
-        isAdmin={isAdminAuthenticated}
-        testimonialsCount={testimonials.length}
+        openAdminTestimonial={() => { if(testimonials.length >= 5) return alert("Limite de 5 atingido"); setCurrentTestimonial(null); setIsAdminTestimonialOpen(true); }}
+        isAdmin={isAdminAuthenticated} testimonialsCount={testimonials.length}
       />
-      
       <main className="flex-grow">
-        <div className="flex flex-col">
-          <section id="inicio" className="flex flex-col justify-center container mx-auto px-4 pt-24 min-h-[90vh] md:min-h-screen">
-            <Hero theme={theme} setView={setView} heroImage={heroImage} isAdmin={isAdminAuthenticated} onHeroImageChange={setHeroImage} />
-          </section>
-
-          <section id="diferenciais" className="flex flex-col justify-center py-10 md:py-24 bg-white dark:bg-transparent">
-            <Features theme={theme} />
-          </section>
-          
-          <section id="produtos" className="flex flex-col justify-center container mx-auto px-4 py-10 md:py-20 bg-white dark:bg-transparent">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8 md:mb-16">
-              <div className="max-w-full text-center md:text-left">
-                <span className="text-fuzzi-blue font-black uppercase tracking-[0.3em] text-[10px] block mb-4">Nossa Vitrine</span>
-                <h2 className="text-4xl md:text-6xl font-black tracking-tight leading-tight md:leading-none md:whitespace-nowrap">
-                  Projetos de <br className="md:hidden" />
-                  <span className="text-fuzzi-blue">Alto Padrão</span>
-                </h2>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {products.map(p => (
-                <ProductCard 
-                  key={p.id} 
-                  product={p} 
-                  theme={theme} 
-                  onEdit={() => { setCurrentProduct(p); setIsEditing(true); setIsAdminProductOpen(true); }} 
-                  onDelete={handleDeleteProductRequest}
-                  onSelect={(prod) => setSelectedProduct(prod)}
-                  isAdmin={isAdminAuthenticated}
-                  isDeleteDisabled={p.featured && featuredCount <= 1}
-                />
-              ))}
-            </div>
-          </section>
-
-          <section id="catalogo" className="flex flex-col justify-center py-10 md:py-24 relative overflow-hidden bg-white dark:bg-transparent">
-              <div className="container mx-auto px-4">
-                <div className={`relative overflow-hidden rounded-[2.5rem] lg:rounded-[4rem] border transition-all duration-500 ${
-                  theme === 'dark' 
-                    ? 'bg-slate-900/50 border-slate-800' 
-                    : 'bg-white border-slate-100 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.08)]'
-                }`}>
-                  <div className="absolute inset-0 lg:hidden">
-                    <img src={mainCatalog?.coverImage} alt="" className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-slate-950/85 backdrop-blur-[2px]"></div>
-                  </div>
-
-                  <div className="grid grid-cols-1 lg:grid-cols-2 items-center relative z-10">
-                    <div className="p-8 md:p-12 lg:p-24 space-y-6 lg:space-y-8 text-center lg:text-left">
-                      <div className="inline-flex items-center justify-center lg:justify-start gap-2 px-4 py-2 rounded-full bg-fuzzi-blue text-white text-[10px] font-black uppercase tracking-widest mx-auto lg:mx-0">
-                        <FileText className="w-4 h-4" /> Especificações Técnicas
-                      </div>
-                      <h2 className={`text-3xl sm:text-4xl md:text-6xl font-black leading-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-                        {mainCatalog?.title || 'Catálogo de Esquadrias'}
-                      </h2>
-                      <p className={`text-sm sm:text-lg leading-relaxed ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
-                        Confira todos os detalhes técnicos, acabamentos e tipologias disponíveis em nossa linha premium. Um material completo para arquitetos e clientes exigentes.
-                      </p>
-                      <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                        <a href={mainCatalog?.pdfUrl || '#'} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 lg:px-10 py-4 lg:py-5 bg-fuzzi-blue text-white font-black rounded-xl lg:rounded-2xl hover:brightness-110 transition-all shadow-xl shadow-fuzzi-blue/40 shadow-[0_0_20px_-5px_rgba(0,207,255,0.4)] active:scale-95 text-base lg:text-lg whitespace-nowrap">
-                          <ExternalLink className="w-5 h-5 lg:w-6 lg:h-6" /> Acessar Catálogo
-                        </a>
-                        <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className={`w-full sm:w-auto group flex items-center justify-center gap-3 px-8 lg:px-10 py-4 lg:py-5 font-black rounded-xl lg:rounded-2xl border-2 transition-all duration-300 active:scale-95 text-base lg:text-lg whitespace-nowrap hover:bg-[#25D366] hover:border-[#25D366] hover:text-white ${theme === 'dark' ? 'bg-slate-950/50 border-slate-800 text-white shadow-lg' : 'border-slate-200 text-slate-600 bg-white shadow-sm'}`}>
-                          <WhatsAppIcon className="w-5 h-5 lg:w-6 lg:h-6 text-[#25D366] group-hover:text-white transition-colors" />
-                          Falar com um vendedor
-                        </a>
-                      </div>
-                    </div>
-                    <div className="hidden lg:block relative aspect-square lg:aspect-auto lg:h-full overflow-hidden bg-slate-100 group">
-                      <img src={mainCatalog?.coverImage} alt="Capa do Catálogo" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
-                      <div className="absolute inset-0 bg-gradient-to-r from-slate-900/40 lg:from-slate-900/80 to-transparent pointer-events-none"></div>
-                    </div>
+        <section id="inicio" className="container mx-auto px-4 pt-24 min-h-[90vh] md:min-h-screen">
+          <Hero theme={theme} setView={setView} heroImage={heroImage} isAdmin={isAdminAuthenticated} onHeroImageChange={handleHeroChange} />
+        </section>
+        <section id="diferenciais" className="py-10 md:py-24"><Features theme={theme} /></section>
+        <section id="produtos" className="container mx-auto px-4 py-10 md:py-20">
+          <div className="mb-12 text-center md:text-left">
+            <span className="text-fuzzi-blue font-black uppercase tracking-[0.3em] text-[10px] block mb-4">Nossa Vitrine</span>
+            <h2 className="text-4xl md:text-6xl font-black">Projetos de <span className="text-fuzzi-blue">Alto Padrão</span></h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {products.map(p => (
+              <ProductCard key={p.id} product={p} theme={theme} isAdmin={isAdminAuthenticated} onEdit={() => { setCurrentProduct(p); setIsEditing(true); setIsAdminProductOpen(true); }} onDelete={(id) => setConfirmDelete({isOpen:true, type:'product', id})} onSelect={setSelectedProduct} />
+            ))}
+          </div>
+        </section>
+        <section id="catalogo" className="py-10 md:py-24">
+          <div className="container mx-auto px-4">
+            <div className={`relative overflow-hidden rounded-[3rem] border ${theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100 shadow-xl'}`}>
+              <div className="grid grid-cols-1 lg:grid-cols-2 items-center">
+                <div className="p-8 md:p-16 space-y-6">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-fuzzi-blue text-white text-[10px] font-black uppercase rounded-full"><FileText className="w-4 h-4"/> Catálogo Técnico</div>
+                  <h2 className="text-3xl md:text-5xl font-black">{mainCatalog?.title}</h2>
+                  <p className="opacity-70">Confira as especificações técnicas e opções de acabamentos.</p>
+                  <div className="flex gap-4">
+                    <a href={mainCatalog?.pdfUrl} target="_blank" className="px-8 py-4 bg-fuzzi-blue text-white font-black rounded-xl shadow-lg">Acessar PDF</a>
                   </div>
                 </div>
+                <div className="hidden lg:block h-full"><img src={mainCatalog?.coverImage} className="w-full h-full object-cover"/></div>
               </div>
-          </section>
-
-          <section id="depoimentos" className="flex flex-col justify-center bg-white dark:bg-transparent">
-            <Testimonials theme={theme} testimonials={testimonials} isAdmin={isAdminAuthenticated} onEdit={(t) => { setCurrentTestimonial(t); setIsAdminTestimonialOpen(true); }} onDelete={handleDeleteTestimonialRequest} />
-          </section>
-        </div>
+            </div>
+          </div>
+        </section>
+        <section id="depoimentos" className="py-10"><Testimonials theme={theme} testimonials={testimonials} isAdmin={isAdminAuthenticated} onEdit={(t)=>{setCurrentTestimonial(t);setIsAdminTestimonialOpen(true)}} onDelete={(id)=>setConfirmDelete({isOpen:true, type:'testimonial', id})} /></section>
       </main>
-
-      <Footer theme={theme} isAdmin={isAdminAuthenticated} isLoginOpen={isLoginOpen} onAdminToggle={handleAdminToggle} onLogin={onLoginSuccess} setIsLoginOpen={setIsLoginOpen} setView={setView} />
-      {selectedProduct && <ProductDetail product={selectedProduct} theme={theme} onClose={() => setSelectedProduct(null)} />}
-      {isAdminProductOpen && <AdminModal theme={theme} onClose={() => setIsAdminProductOpen(false)} onSave={handleSaveProduct} editProduct={currentProduct} isEditing={isEditing} />}
-      {isAdminTestimonialOpen && <TestimonialModal theme={theme} onClose={() => setIsAdminTestimonialOpen(false)} onSave={handleSaveTestimonial} editTestimonial={currentTestimonial} />}
-      {isAdminPDFOpen && <CatalogPDFModal theme={theme} onClose={() => setIsAdminPDFOpen(false)} onSave={handleSavePDF} editPDF={mainCatalog} />}
-      <ConfirmModal theme={theme} isOpen={confirmDelete.isOpen} title="Tem certeza?" message={confirmDelete.type === 'product' ? "Esta ação excluirá o produto permanentemente. Isso não pode ser desfeito." : "Esta ação excluirá o depoimento permanentemente. Isso não pode ser desfeito."} onConfirm={executeDelete} onCancel={() => setConfirmDelete({ isOpen: false, type: null, id: null })} />
+      <Footer theme={theme} isAdmin={isAdminAuthenticated} onAdminToggle={()=>setIsAdminAuthenticated(false)} onLogin={onLoginSuccess} setView={setView} setIsLoginOpen={setIsLoginOpen} isLoginOpen={isLoginOpen} />
+      {selectedProduct && <ProductDetail product={selectedProduct} theme={theme} onClose={()=>setSelectedProduct(null)} />}
+      {isAdminProductOpen && <AdminModal theme={theme} onClose={()=>setIsAdminProductOpen(false)} onSave={handleSaveProduct} editProduct={currentProduct} isEditing={isEditing} />}
+      {isAdminTestimonialOpen && <TestimonialModal theme={theme} onClose={()=>setIsAdminTestimonialOpen(false)} onSave={handleSaveTestimonial} editTestimonial={currentTestimonial} />}
+      {isAdminPDFOpen && <CatalogPDFModal theme={theme} onClose={()=>setIsAdminPDFOpen(false)} onSave={handleSavePDF} editPDF={mainCatalog} />}
+      <ConfirmModal theme={theme} isOpen={confirmDelete.isOpen} title="Confirmar exclusão?" message="Esta ação é permanente." onConfirm={executeDelete} onCancel={()=>setConfirmDelete({isOpen:false, type:null, id:null})} />
     </div>
   );
 };

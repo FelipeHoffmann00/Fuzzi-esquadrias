@@ -12,6 +12,7 @@ interface AdminModalProps {
 }
 
 const MAX_IMAGES = 15;
+const MAX_DIMENSION = 800; // Limite para economizar espaço no localStorage
 
 const AdminModal: React.FC<AdminModalProps> = ({ theme, onClose, onSave, editProduct, isEditing }) => {
   const [name, setName] = useState('');
@@ -49,10 +50,6 @@ const AdminModal: React.FC<AdminModalProps> = ({ theme, onClose, onSave, editPro
     const availableSlots = MAX_IMAGES - currentCount;
     const filesToProcess = filesArray.slice(0, availableSlots);
 
-    if (filesArray.length > availableSlots) {
-      setError(`Apenas ${availableSlots} fotos foram adicionadas. Limite de ${MAX_IMAGES} fotos por destaque.`);
-    }
-
     setIsProcessing(true);
     const newImages: string[] = [];
 
@@ -79,16 +76,31 @@ const AdminModal: React.FC<AdminModalProps> = ({ theme, onClose, onSave, editPro
         img.src = event.target?.result as string;
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          const width = img.width;
-          const height = img.height;
+          let width = img.width;
+          let height = img.height;
+
+          // Redimensionamento proporcional para economizar memória
+          if (width > height) {
+            if (width > MAX_DIMENSION) {
+              height *= MAX_DIMENSION / width;
+              width = MAX_DIMENSION;
+            }
+          } else {
+            if (height > MAX_DIMENSION) {
+              width *= MAX_DIMENSION / height;
+              height = MAX_DIMENSION;
+            }
+          }
+
           canvas.width = width;
           canvas.height = height;
           const ctx = canvas.getContext('2d');
           if (ctx) {
             ctx.imageSmoothingEnabled = true;
-            ctx.imageSmoothingQuality = 'high';
+            ctx.imageSmoothingQuality = 'medium';
             ctx.drawImage(img, 0, 0, width, height);
-            resolve(canvas.toDataURL('image/jpeg', 0.9));
+            // Qualidade 0.7 é o equilíbrio ideal para mobile
+            resolve(canvas.toDataURL('image/jpeg', 0.7));
           } else {
             reject(new Error("Erro ao criar contexto 2D"));
           }
@@ -100,16 +112,14 @@ const AdminModal: React.FC<AdminModalProps> = ({ theme, onClose, onSave, editPro
 
   const removeImage = (index: number) => {
     setImages(prev => prev.filter((_, i) => i !== index));
-    if (error && error.includes('Limite')) setError(null);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-
-    if (!name.trim()) { setError('O nome do produto é obrigatório.'); return; }
-    if (!description.trim()) { setError('A descrição é obrigatória.'); return; }
-    if (images.length === 0) { setError('Adicione pelo menos uma foto do produto.'); return; }
+    if (!name.trim() || !description.trim() || images.length === 0) {
+      setError('Preencha todos os campos obrigatórios.');
+      return;
+    }
 
     const product: Product = {
       id: isEditing && editProduct ? editProduct.id : `prod_${Date.now()}`,
@@ -127,162 +137,47 @@ const AdminModal: React.FC<AdminModalProps> = ({ theme, onClose, onSave, editPro
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className={`w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[3rem] shadow-2xl transform animate-in zoom-in-95 duration-300 ${
-        theme === 'dark' ? 'bg-slate-900 border border-slate-800' : 'bg-white'
-      }`}>
+      <div className={`w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[3rem] shadow-2xl ${theme === 'dark' ? 'bg-slate-900 border border-slate-800' : 'bg-white'}`}>
         <div className="sticky top-0 z-10 p-6 border-b flex items-center justify-between bg-inherit border-inherit">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-fuzzi-blue rounded-2xl shadow-lg shadow-fuzzi-blue/20">
-              <Plus className="w-5 h-5 text-white" />
-            </div>
-            <h2 className={`text-xl font-black ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-              {isEditing ? 'Editar Destaque' : 'Novo Destaque'}
-            </h2>
-          </div>
-          <button onClick={onClose} className="p-2.5 hover:bg-red-50 hover:text-red-500 rounded-full transition-colors active:scale-90">
-            <X className="w-6 h-6" />
-          </button>
+          <h2 className="text-xl font-black">{isEditing ? 'Editar Destaque' : 'Novo Destaque'}</h2>
+          <button onClick={onClose} className="p-2.5 hover:text-red-500 transition-colors"><X className="w-6 h-6" /></button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-8 space-y-6">
-          {error && (
-            <div className="flex items-center gap-3 p-5 bg-red-50 border border-red-100 text-red-600 rounded-2xl animate-in slide-in-from-top-2">
-              <AlertCircle className="w-5 h-5 flex-shrink-0" />
-              <p className="text-sm font-bold">{error}</p>
-            </div>
-          )}
-
+          {error && <div className="p-4 bg-red-50 text-red-600 rounded-xl text-xs font-bold">{error}</div>}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Nome do Produto*</label>
-              <input 
-                type="text" 
-                value={name}
-                onChange={(e) => {setName(e.target.value); setError(null);}}
-                className={`w-full px-5 py-4 rounded-2xl border outline-none transition-[border-color,box-shadow] focus:ring-4 focus:ring-fuzzi-blue/10 ${
-                  theme === 'dark' ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-fuzzi-blue/5 text-slate-900'
-                }`}
-                placeholder="Ex: Janela Integrada"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Categoria*</label>
-              <select 
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className={`w-full px-5 py-4 rounded-2xl border outline-none transition-[border-color,box-shadow] focus:ring-4 focus:ring-fuzzi-blue/10 ${
-                  theme === 'dark' ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-fuzzi-blue/5 text-slate-900'
-                }`}
-              >
-                <option value="Janelas">Janelas</option>
-                <option value="Portas">Portas</option>
-                <option value="Portões">Portões</option>
-                <option value="Acessórios">Acessórios</option>
-              </select>
-            </div>
+            <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Nome do Produto" className={`w-full px-5 py-4 rounded-2xl border outline-none ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-200'}`} />
+            <select value={category} onChange={(e) => setCategory(e.target.value)} className={`w-full px-5 py-4 rounded-2xl border outline-none ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+              <option value="Janelas">Janelas</option>
+              <option value="Portas">Portas</option>
+              <option value="Portões">Portões</option>
+              <option value="Acessórios">Acessórios</option>
+            </select>
           </div>
-
-          <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Descrição*</label>
-            <textarea 
-              value={description}
-              onChange={(e) => {setDescription(e.target.value); setError(null);}}
-              rows={3}
-              className={`w-full px-5 py-4 rounded-2xl border outline-none transition-[border-color,box-shadow] focus:ring-4 focus:ring-fuzzi-blue/10 resize-none ${
-                theme === 'dark' ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-fuzzi-blue/5 text-slate-900'
-              }`}
-              placeholder="Descreva os diferenciais técnicos do produto..."
-            />
-          </div>
-
+          <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} placeholder="Descrição detalhada" className={`w-full px-5 py-4 rounded-2xl border outline-none ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-200'}`} />
+          
           <div className="space-y-4">
-            <div className="flex justify-between items-end">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Mídias do Produto*</label>
-              <span className={`text-[10px] font-black ${images.length >= MAX_IMAGES ? 'text-red-500' : 'text-fuzzi-blue'}`}>
-                {images.length} / {MAX_IMAGES} fotos
-              </span>
-            </div>
-            
+            <div className="flex justify-between items-center"><span className="text-[10px] font-black uppercase text-slate-400">Fotos ({images.length}/{MAX_IMAGES})</span></div>
             <div className="flex gap-4">
-              <button 
-                type="button"
-                disabled={isLimitReached || isProcessing}
-                onClick={() => fileInputRef.current?.click()}
-                className={`flex-1 flex flex-col items-center justify-center gap-2 p-7 rounded-[2rem] border-2 border-dashed transition-all duration-200 ${
-                  isLimitReached 
-                    ? 'opacity-50 cursor-not-allowed bg-slate-100 dark:bg-slate-800 border-slate-300 text-slate-400'
-                    : `hover:border-fuzzi-blue hover:bg-fuzzi-blue/5 ${theme === 'dark' ? 'bg-slate-800/50 border-slate-700 text-slate-500' : 'bg-fuzzi-blue/5 border-fuzzi-blue/10 text-fuzzi-blue'}`
-                }`}
-              >
-                <ImageIcon className="w-8 h-8" />
-                <span className="text-[10px] font-black uppercase">
-                  {isLimitReached ? 'Limite Atingido' : 'Galeria'}
-                </span>
-              </button>
-              <button 
-                type="button"
-                disabled={isLimitReached || isProcessing}
-                onClick={() => cameraInputRef.current?.click()}
-                className={`flex-1 flex flex-col items-center justify-center gap-2 p-7 rounded-[2rem] border-2 border-dashed transition-all duration-200 ${
-                  isLimitReached 
-                    ? 'opacity-50 cursor-not-allowed bg-slate-100 dark:bg-slate-800 border-slate-300 text-slate-400'
-                    : `hover:border-fuzzi-blue hover:bg-fuzzi-blue/5 ${theme === 'dark' ? 'bg-slate-800/50 border-slate-700 text-slate-500' : 'bg-fuzzi-blue/5 border-fuzzi-blue/10 text-fuzzi-blue'}`
-                }`}
-              >
-                <Camera className="w-8 h-8" />
-                <span className="text-[10px] font-black uppercase">
-                  {isLimitReached ? 'Limite Atingido' : 'Tirar Foto'}
-                </span>
-              </button>
+              <button type="button" disabled={isLimitReached || isProcessing} onClick={() => fileInputRef.current?.click()} className="flex-1 p-6 rounded-2xl border-2 border-dashed border-fuzzi-blue/20 text-fuzzi-blue hover:bg-fuzzi-blue/5 flex flex-col items-center gap-2"><ImageIcon className="w-6 h-6"/><span className="text-[10px] font-black uppercase">Galeria</span></button>
+              <button type="button" disabled={isLimitReached || isProcessing} onClick={() => cameraInputRef.current?.click()} className="flex-1 p-6 rounded-2xl border-2 border-dashed border-fuzzi-blue/20 text-fuzzi-blue hover:bg-fuzzi-blue/5 flex flex-col items-center gap-2"><Camera className="w-6 h-6"/><span className="text-[10px] font-black uppercase">Câmera</span></button>
             </div>
-
             <input type="file" ref={fileInputRef} className="hidden" accept="image/*" multiple onChange={handleFileChange} />
             <input type="file" ref={cameraInputRef} className="hidden" accept="image/*" capture="environment" onChange={handleFileChange} />
-
-            {images.length > 0 && (
-              <div className="grid grid-cols-4 sm:grid-cols-5 gap-3 pt-2">
-                {images.map((img, idx) => (
-                  <div key={idx} className="relative group aspect-square rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm will-change-transform hover:scale-105 transition-transform duration-200">
-                    <img src={img} alt="Preview" className="w-full h-full object-cover" />
-                    <button 
-                      type="button"
-                      onClick={() => removeImage(idx)}
-                      className="absolute top-1.5 right-1.5 p-1.5 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
             
-            {isProcessing && (
-              <div className="flex items-center justify-center gap-3 py-4 text-fuzzi-blue">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span className="font-black text-[10px] uppercase tracking-[0.2em] animate-pulse">Processando Fotos...</span>
-              </div>
-            )}
+            <div className="grid grid-cols-4 gap-3">
+              {images.map((img, idx) => (
+                <div key={idx} className="relative aspect-square rounded-xl overflow-hidden group">
+                  <img src={img} className="w-full h-full object-cover" />
+                  <button type="button" onClick={() => removeImage(idx)} className="absolute top-1 right-1 p-1 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><X className="w-3 h-3"/></button>
+                </div>
+              ))}
+            </div>
+            {isProcessing && <div className="text-center py-2 text-fuzzi-blue animate-pulse text-xs font-black">Processando...</div>}
           </div>
-
-          <div className="pt-6 flex flex-col sm:flex-row gap-4">
-            <button 
-              type="button" 
-              onClick={onClose}
-              className={`flex-1 py-5 font-black rounded-2xl transition-[background-color,color] duration-200 ${
-                theme === 'dark' ? 'bg-slate-800 text-white hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              }`}
-            >
-              Cancelar
-            </button>
-            <button 
-              type="submit" 
-              disabled={isProcessing}
-              className={`flex-1 py-5 text-white font-black rounded-2xl transition-[background-color,transform,box-shadow] duration-200 shadow-xl active:scale-95 ${
-                isProcessing ? 'bg-slate-400 cursor-not-allowed' : 'bg-fuzzi-blue hover:brightness-110 shadow-fuzzi-blue/20'
-              }`}
-            >
-              {isEditing ? 'Salvar Tudo' : 'Confirmar Cadastro'}
-            </button>
+          <div className="flex gap-4">
+            <button type="button" onClick={onClose} className="flex-1 py-4 font-black opacity-50">Cancelar</button>
+            <button type="submit" disabled={isProcessing} className="flex-1 py-4 bg-fuzzi-blue text-white font-black rounded-2xl shadow-lg">Confirmar</button>
           </div>
         </form>
       </div>

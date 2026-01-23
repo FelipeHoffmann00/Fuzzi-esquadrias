@@ -64,9 +64,9 @@ const Hero: React.FC<HeroProps> = ({ theme, setView, heroImage, isAdmin, onHeroI
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Alta definição para o Hero
-    canvas.width = 1200;
-    canvas.height = 1200;
+    // Resolução otimizada para o Hero (1000px é suficiente para qualquer celular)
+    canvas.width = 1000;
+    canvas.height = 1000;
 
     const viewer = viewerRef.current.getBoundingClientRect();
     const img = imgRef.current.getBoundingClientRect();
@@ -80,19 +80,18 @@ const Hero: React.FC<HeroProps> = ({ theme, setView, heroImage, isAdmin, onHeroI
     const cropH = viewer.height * scaleY;
 
     ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
+    ctx.imageSmoothingQuality = 'medium';
     ctx.drawImage(imgRef.current, cropX, cropY, cropW, cropH, 0, 0, canvas.width, canvas.height);
 
-    // Otimizado para 0.7 para economizar espaço no mobile sem perder qualidade
-    onHeroImageChange(canvas.toDataURL('image/jpeg', 0.7));
+    // Qualidade 0.6 reduz drasticamente o peso da string Base64 no celular
+    const finalData = canvas.toDataURL('image/jpeg', 0.6);
+    onHeroImageChange(finalData);
     setIsCropping(false);
     setTempImage(null);
   };
 
   return (
     <div className="py-8 md:py-20 flex flex-col lg:flex-row items-center gap-8 lg:gap-20">
-      
-      {/* Coluna da Esquerda: Texto */}
       <div className="flex-1 text-center lg:text-left animate-in slide-in-from-left-8 duration-700">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-fuzzi-blue/10 text-fuzzi-blue text-[10px] font-black uppercase tracking-[0.2em] mb-6 md:mb-8 mx-auto lg:mx-0">
           <span className="relative flex h-2 w-2">
@@ -101,135 +100,43 @@ const Hero: React.FC<HeroProps> = ({ theme, setView, heroImage, isAdmin, onHeroI
           </span>
           Qualidade em cada detalhe
         </div>
-        
-        <h1 className={`text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-extrabold mb-6 md:mb-8 leading-[1.05] tracking-tight transition-colors duration-300 ${theme === 'dark' ? 'text-white' : 'text-fuzzi-gray'}`}>
+        <h1 className={`text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-extrabold mb-6 leading-[1.05] tracking-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
           Design & Qualidade <br />
           em <span className="text-fuzzi-blue">Esquadrias</span>
         </h1>
-        
-        <p className={`text-lg md:text-2xl mb-4 max-w-xl transition-colors duration-300 leading-relaxed mx-auto lg:mx-0 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
-          Soluções sob medida em alumínio para transformar seu ambiente. 
-          Durabilidade, estética e tecnologia integradas em cada detalhe da sua obra.
+        <p className={`text-lg md:text-2xl mb-8 max-w-xl mx-auto lg:mx-0 opacity-70`}>
+          Soluções sob medida em alumínio para transformar seu ambiente com durabilidade e estética.
         </p>
       </div>
 
-      {/* Coluna da Direita: Imagem */}
-      <div className="flex-1 w-[90%] md:w-full relative group animate-in slide-in-from-right-8 duration-1000 mx-auto">
-        <div className="absolute -inset-10 bg-fuzzi-blue/20 blur-[100px] rounded-full opacity-40 group-hover:opacity-60 transition-opacity duration-1000"></div>
-        
-        <div className={`relative overflow-hidden rounded-[2.5rem] md:rounded-[3rem] transition-all duration-700 ease-out fix-clipping ${
-          theme === 'dark' 
-            ? 'ring-1 ring-white/10 shadow-[0_30px_100px_-20px_rgba(0,0,0,0.8),0_0_60px_-10px_rgba(0,207,255,0.4)]' 
-            : 'ring-1 ring-black/5 shadow-[0_30px_100px_-20px_rgba(0,0,0,0.2),0_0_40px_-10px_rgba(0,0,0,0.1)]'
-        } group-hover:scale-[1.01]`}>
-          
+      <div className="flex-1 w-full relative group mx-auto">
+        <div className={`relative overflow-hidden rounded-[2.5rem] md:rounded-[3rem] transition-all duration-700 ease-out ${
+          theme === 'dark' ? 'shadow-[0_30px_100px_-20px_rgba(0,0,200,0.4)]' : 'shadow-2xl'
+        }`}>
           <img 
-            key={heroImage}
+            key={heroImage.substring(0, 100)} // Key instável para forçar re-render parcial no celular
             src={heroImage} 
-            alt="Fuzzi Esquadrias Showroom" 
-            className={`w-full aspect-square object-cover transition-all duration-1000 ease-out ${isProcessing ? 'opacity-50 scale-105' : 'opacity-100 scale-100 group-hover:scale-110'}`}
+            className="w-full aspect-square object-cover"
           />
-          
-          <div className={`absolute inset-0 transition-opacity duration-700 ${theme === 'dark' ? 'bg-gradient-to-t from-slate-950/20 to-transparent' : 'bg-gradient-to-t from-fuzzi-blue/5 to-transparent'}`}></div>
-          
           {isAdmin && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
-              <button 
-                onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-3 px-8 py-4 bg-fuzzi-blue text-white rounded-3xl font-black hover:brightness-110 transition-all shadow-2xl active:scale-90"
-              >
-                <Camera className="w-5 h-5" />
-                Alterar Foto
-              </button>
-              <button 
-                onClick={() => { setTempImage(heroImage); setIsCropping(true); setZoom(1); setPosition({x:0,y:0}); }}
-                className="flex items-center gap-3 px-8 py-4 bg-white/20 backdrop-blur-xl border border-white/30 text-white rounded-3xl font-black hover:bg-white/30 transition-all shadow-2xl active:scale-90"
-              >
-                <Maximize className="w-5 h-5" />
-                Ajustar Enquadramento
-              </button>
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                className="hidden" 
-                accept="image/*" 
-                onChange={handleFileChange} 
-              />
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button onClick={() => fileInputRef.current?.click()} className="px-8 py-4 bg-fuzzi-blue text-white rounded-2xl font-black shadow-xl active:scale-90 flex items-center gap-2"><Camera className="w-5 h-5"/> Alterar Foto</button>
+              <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
             </div>
           )}
         </div>
       </div>
 
-      {/* Modal de Crop para o Hero */}
       {isCropping && tempImage && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-in fade-in duration-300">
-          <div className={`w-full max-w-lg rounded-[3rem] shadow-2xl overflow-hidden border animate-in zoom-in-95 duration-300 ${
-            theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100'
-          }`}>
-            <div className="p-6 border-b border-inherit flex items-center justify-between">
-              <h3 className={`text-xl font-black ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Ajustar Foto Principal</h3>
-              <button onClick={() => { setIsCropping(false); setTempImage(null); }} className="p-2 hover:text-red-500 transition-colors"><X /></button>
-            </div>
-            
-            <div className="p-8 space-y-8">
-              <div 
-                ref={viewerRef}
-                className="relative w-full aspect-square mx-auto rounded-[2rem] overflow-hidden bg-slate-900 border-4 border-fuzzi-blue shadow-2xl cursor-move touch-none"
-                onMouseDown={onMouseDown}
-                onMouseMove={onMouseMove}
-                onMouseUp={stopDragging}
-                onMouseLeave={stopDragging}
-                onTouchStart={onMouseDown}
-                onTouchMove={onMouseMove}
-                onTouchEnd={stopDragging}
-              >
-                <img 
-                  ref={imgRef}
-                  src={tempImage} 
-                  className="absolute max-w-none pointer-events-none"
-                  style={{
-                    transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
-                    left: '50%',
-                    top: '50%',
-                    width: '100%',
-                    height: 'auto',
-                    marginLeft: '-50%',
-                    marginTop: '-50%',
-                    transformOrigin: 'center'
-                  }}
-                />
-                <div className="absolute inset-0 pointer-events-none grid grid-cols-3 grid-rows-3 opacity-20">
-                  {[...Array(9)].map((_, i) => <div key={i} className="border border-white/30"></div>)}
-                </div>
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+          <div className={`w-full max-w-lg rounded-[3rem] overflow-hidden ${theme === 'dark' ? 'bg-slate-900 border border-slate-800' : 'bg-white'}`}>
+            <div className="p-6 border-b flex items-center justify-between"><h3 className="font-black">Ajustar Capa</h3><button onClick={() => setIsCropping(false)}><X /></button></div>
+            <div className="p-8 space-y-6">
+              <div ref={viewerRef} className="relative w-full aspect-square rounded-[2rem] overflow-hidden bg-black border-4 border-fuzzi-blue touch-none" onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={stopDragging} onTouchStart={onMouseDown} onTouchMove={onMouseMove} onTouchEnd={stopDragging}>
+                <img ref={imgRef} src={tempImage} className="absolute max-w-none pointer-events-none" style={{ transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`, left: '50%', top: '50%', width: '100%', height: 'auto', marginLeft: '-50%', marginTop: '-50%' }} />
               </div>
-
-              <div className="space-y-6">
-                <div className="flex items-center gap-4 bg-slate-800 p-4 rounded-2xl shadow-inner">
-                  <ZoomIn className="w-5 h-5 text-fuzzi-blue" />
-                  <input 
-                    type="range" min="0.5" max="5" step="0.01" 
-                    value={zoom} 
-                    onChange={(e) => setZoom(parseFloat(e.target.value))}
-                    className="flex-1 accent-fuzzi-blue h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer"
-                  />
-                  <span className="text-[10px] font-black text-slate-400 w-8">{Math.round(zoom * 100)}%</span>
-                </div>
-
-                <div className="flex gap-4">
-                  <button 
-                    onClick={() => { setIsCropping(false); setTempImage(null); }}
-                    className="flex-1 py-4 font-black text-slate-500 rounded-2xl bg-slate-100 dark:bg-slate-800"
-                  >
-                    Cancelar
-                  </button>
-                  <button 
-                    onClick={handleApplyCrop}
-                    className="flex-1 py-4 bg-fuzzi-blue text-white font-black rounded-2xl shadow-xl shadow-fuzzi-blue/20 flex items-center justify-center gap-2 active:scale-95"
-                  >
-                    <Check className="w-5 h-5" /> Salvar Ajuste
-                  </button>
-                </div>
-              </div>
+              <input type="range" min="0.5" max="4" step="0.01" value={zoom} onChange={(e) => setZoom(parseFloat(e.target.value))} className="w-full accent-fuzzi-blue" />
+              <button onClick={handleApplyCrop} className="w-full py-4 bg-fuzzi-blue text-white font-black rounded-2xl shadow-xl">Salvar Alteração</button>
             </div>
           </div>
         </div>
