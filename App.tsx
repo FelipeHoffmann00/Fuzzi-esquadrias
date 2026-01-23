@@ -196,14 +196,14 @@ const App: React.FC = () => {
           </section>
           
           <section id="produtos" className="flex flex-col justify-center container mx-auto px-4 py-10 md:py-20 bg-white dark:bg-transparent">
-            <div className="flex flex-col md:flex-row justify-between items-end gap-4 mb-8 md:mb-16">
-              <div className="max-w-xl text-center md:text-left">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8 md:mb-16">
+              <div className="max-w-full text-center md:text-left">
                 <span className="text-fuzzi-blue font-black uppercase tracking-[0.3em] text-[10px] block mb-4">Nossa Vitrine</span>
-                <h2 className="text-4xl md:text-6xl font-black tracking-tight leading-none">Projetos de <span className="text-fuzzi-blue">Alto Padrão</span></h2>
+                <h2 className="text-4xl md:text-6xl font-black tracking-tight leading-tight md:leading-none md:whitespace-nowrap">
+                  Projetos de <br className="md:hidden" />
+                  <span className="text-fuzzi-blue">Alto Padrão</span>
+                </h2>
               </div>
-              <p className={`max-w-md text-sm md:text-base text-center md:text-left ${theme === 'dark' ? 'text-slate-500' : 'text-slate-500'}`}>
-                Cada peça é desenvolvida sob medida, unindo tecnologia de ponta e acabamento artesanal.
-              </p>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
