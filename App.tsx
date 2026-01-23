@@ -57,9 +57,6 @@ const App: React.FC = () => {
 
       const savedTheme = localStorage.getItem('fuzzi_theme') as Theme;
       if (savedTheme) setTheme(savedTheme);
-
-      const auth = localStorage.getItem('fuzzi_admin_auth');
-      if (auth === 'true') setIsAdminAuthenticated(true);
     } catch (e) {
       console.warn("Erro ao carregar dados. Iniciando com dados padrão.", e);
       setProducts(INITIAL_PRODUCTS);
@@ -89,16 +86,12 @@ const App: React.FC = () => {
   };
 
   const handleAdminToggle = () => {
-    if (isAdminAuthenticated) {
-      setIsAdminAuthenticated(false);
-      localStorage.removeItem('fuzzi_admin_auth');
-    }
+    setIsAdminAuthenticated(false);
   };
 
   const onLoginSuccess = (password: string) => {
     if (password === '123') {
       setIsAdminAuthenticated(true);
-      localStorage.setItem('fuzzi_admin_auth', 'true');
     }
   };
 
@@ -172,7 +165,7 @@ const App: React.FC = () => {
   const featuredCount = products.filter(p => p.featured).length;
 
   return (
-    <div className={`min-h-screen transition-theme flex flex-col overflow-x-hidden ${theme === 'dark' ? 'bg-slate-950 text-white' : 'bg-fuzzi-light text-slate-900'}`}>
+    <div className={`min-h-screen transition-theme flex flex-col overflow-x-hidden ${theme === 'dark' ? 'bg-slate-950 text-white' : 'bg-white text-slate-900'}`}>
       <Header 
         theme={theme} 
         view={view}
@@ -198,11 +191,11 @@ const App: React.FC = () => {
             <Hero theme={theme} setView={setView} heroImage={heroImage} isAdmin={isAdminAuthenticated} onHeroImageChange={setHeroImage} />
           </section>
 
-          <section id="diferenciais" className={`flex flex-col justify-center py-10 md:py-24`}>
+          <section id="diferenciais" className="flex flex-col justify-center py-10 md:py-24 bg-white dark:bg-transparent">
             <Features theme={theme} />
           </section>
           
-          <section id="produtos" className="flex flex-col justify-center container mx-auto px-4 py-10 md:py-20">
+          <section id="produtos" className="flex flex-col justify-center container mx-auto px-4 py-10 md:py-20 bg-white dark:bg-transparent">
             <div className="flex flex-col md:flex-row justify-between items-end gap-4 mb-8 md:mb-16">
               <div className="max-w-xl text-center md:text-left">
                 <span className="text-fuzzi-blue font-black uppercase tracking-[0.3em] text-[10px] block mb-4">Nossa Vitrine</span>
@@ -229,14 +222,13 @@ const App: React.FC = () => {
             </div>
           </section>
 
-          <section id="catalogo" className="flex flex-col justify-center py-10 md:py-24 relative overflow-hidden">
+          <section id="catalogo" className="flex flex-col justify-center py-10 md:py-24 relative overflow-hidden bg-white dark:bg-transparent">
               <div className="container mx-auto px-4">
                 <div className={`relative overflow-hidden rounded-[2.5rem] lg:rounded-[4rem] border transition-all duration-500 ${
                   theme === 'dark' 
                     ? 'bg-slate-900/50 border-slate-800' 
-                    : 'bg-white border-slate-100 shadow-[0_30px_100px_-20px_rgba(0,207,255,0.15)]'
+                    : 'bg-white border-slate-100 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.08)]'
                 }`}>
-                  
                   <div className="absolute inset-0 lg:hidden">
                     <img src={mainCatalog?.coverImage} alt="" className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-slate-950/85 backdrop-blur-[2px]"></div>
@@ -247,44 +239,22 @@ const App: React.FC = () => {
                       <div className="inline-flex items-center justify-center lg:justify-start gap-2 px-4 py-2 rounded-full bg-fuzzi-blue text-white text-[10px] font-black uppercase tracking-widest mx-auto lg:mx-0">
                         <FileText className="w-4 h-4" /> Especificações Técnicas
                       </div>
-                      
-                      <h2 className={`text-3xl sm:text-4xl md:text-6xl font-black leading-tight ${
-                        'text-white lg:' + (theme === 'dark' ? 'text-white' : 'text-slate-900')
-                      }`}>
+                      <h2 className={`text-3xl sm:text-4xl md:text-6xl font-black leading-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
                         {mainCatalog?.title || 'Catálogo de Esquadrias'}
                       </h2>
-                      
-                      <p className={`text-sm sm:text-lg leading-relaxed ${
-                         'text-slate-300 lg:' + (theme === 'dark' ? 'text-slate-400' : 'text-slate-600')
-                      }`}>
+                      <p className={`text-sm sm:text-lg leading-relaxed ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
                         Confira todos os detalhes técnicos, acabamentos e tipologias disponíveis em nossa linha premium. Um material completo para arquitetos e clientes exigentes.
                       </p>
-                      
                       <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                        <a 
-                          href={mainCatalog?.pdfUrl || '#'} 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 lg:px-10 py-4 lg:py-5 bg-fuzzi-blue text-white font-black rounded-xl lg:rounded-2xl hover:brightness-110 transition-all shadow-xl shadow-fuzzi-blue/20 active:scale-95 text-base lg:text-lg"
-                        >
+                        <a href={mainCatalog?.pdfUrl || '#'} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 lg:px-10 py-4 lg:py-5 bg-fuzzi-blue text-white font-black rounded-xl lg:rounded-2xl hover:brightness-110 transition-all shadow-xl shadow-fuzzi-blue/20 active:scale-95 text-base lg:text-lg">
                           <ExternalLink className="w-5 h-5 lg:w-6 lg:h-6" /> Acessar Catálogo
                         </a>
-                        <a 
-                          href={whatsappUrl} 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          className={`w-full sm:w-auto group flex items-center justify-center gap-3 px-8 lg:px-10 py-4 lg:py-5 font-black rounded-xl lg:rounded-2xl border-2 transition-all duration-300 active:scale-95 text-base lg:text-lg hover:bg-[#25D366] hover:border-[#25D366] hover:text-white ${
-                            'border-slate-600 text-white lg:border-slate-800 lg:text-white'
-                          } ${
-                            theme !== 'dark' ? 'lg:border-fuzzi-blue/10 lg:text-fuzzi-blue lg:shadow-sm lg:bg-white' : ''
-                          }`}
-                        >
+                        <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className={`w-full sm:w-auto group flex items-center justify-center gap-3 px-8 lg:px-10 py-4 lg:py-5 font-black rounded-xl lg:rounded-2xl border-2 transition-all duration-300 active:scale-95 text-base lg:text-lg hover:bg-[#25D366] hover:border-[#25D366] hover:text-white ${theme === 'dark' ? 'border-slate-800 text-white' : 'border-slate-200 text-slate-600 bg-white shadow-sm'}`}>
                           <WhatsAppIcon className="w-5 h-5 lg:w-6 lg:h-6 text-[#25D366] group-hover:text-white transition-colors" />
                           Falar com um vendedor
                         </a>
                       </div>
                     </div>
-
                     <div className="hidden lg:block relative aspect-square lg:aspect-auto lg:h-full overflow-hidden bg-slate-100 group">
                       <img src={mainCatalog?.coverImage} alt="Capa do Catálogo" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
                       <div className="absolute inset-0 bg-gradient-to-r from-slate-900/40 lg:from-slate-900/80 to-transparent pointer-events-none"></div>
@@ -294,46 +264,17 @@ const App: React.FC = () => {
               </div>
           </section>
 
-          <section id="depoimentos" className="flex flex-col justify-center">
-            <Testimonials 
-              theme={theme} 
-              testimonials={testimonials} 
-              isAdmin={isAdminAuthenticated}
-              onEdit={(t) => { setCurrentTestimonial(t); setIsAdminTestimonialOpen(true); }}
-              onDelete={handleDeleteTestimonialRequest}
-            />
+          <section id="depoimentos" className="flex flex-col justify-center bg-white dark:bg-transparent">
+            <Testimonials theme={theme} testimonials={testimonials} isAdmin={isAdminAuthenticated} onEdit={(t) => { setCurrentTestimonial(t); setIsAdminTestimonialOpen(true); }} onDelete={handleDeleteTestimonialRequest} />
           </section>
         </div>
       </main>
 
       <Footer theme={theme} isAdmin={isAdminAuthenticated} isLoginOpen={isLoginOpen} onAdminToggle={handleAdminToggle} onLogin={onLoginSuccess} setIsLoginOpen={setIsLoginOpen} setView={setView} />
-
-      {selectedProduct && (
-        <ProductDetail 
-          product={selectedProduct} 
-          theme={theme} 
-          onClose={() => setSelectedProduct(null)} 
-        />
-      )}
-
-      {isAdminProductOpen && (
-        <AdminModal theme={theme} onClose={() => setIsAdminProductOpen(false)} onSave={handleSaveProduct} editProduct={currentProduct} isEditing={isEditing} />
-      )}
-      {isAdminTestimonialOpen && (
-        <TestimonialModal theme={theme} onClose={() => setIsAdminTestimonialOpen(false)} onSave={handleSaveTestimonial} editTestimonial={currentTestimonial} />
-      )}
-
-      <ConfirmModal
-        theme={theme}
-        isOpen={confirmDelete.isOpen}
-        title="Tem certeza?"
-        message={confirmDelete.type === 'product' 
-          ? "Esta ação excluirá o produto permanentemente. Isso não pode ser desfeito." 
-          : "Esta ação excluirá o depoimento permanentemente. Isso não pode ser desfeito."
-        }
-        onConfirm={executeDelete}
-        onCancel={() => setConfirmDelete({ isOpen: false, type: null, id: null })}
-      />
+      {selectedProduct && <ProductDetail product={selectedProduct} theme={theme} onClose={() => setSelectedProduct(null)} />}
+      {isAdminProductOpen && <AdminModal theme={theme} onClose={() => setIsAdminProductOpen(false)} onSave={handleSaveProduct} editProduct={currentProduct} isEditing={isEditing} />}
+      {isAdminTestimonialOpen && <TestimonialModal theme={theme} onClose={() => setIsAdminTestimonialOpen(false)} onSave={handleSaveTestimonial} editTestimonial={currentTestimonial} />}
+      <ConfirmModal theme={theme} isOpen={confirmDelete.isOpen} title="Tem certeza?" message={confirmDelete.type === 'product' ? "Esta ação excluirá o produto permanentemente. Isso não pode ser desfeito." : "Esta ação excluirá o depoimento permanentemente. Isso não pode ser desfeito."} onConfirm={executeDelete} onCancel={() => setConfirmDelete({ isOpen: false, type: null, id: null })} />
     </div>
   );
 };

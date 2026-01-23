@@ -23,10 +23,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, theme, onEdit, onDel
 
   return (
     <div 
-      className={`group flex flex-col h-full rounded-3xl overflow-hidden border cursor-pointer transition-[transform,shadow,border-color] duration-300 will-change-transform fix-clipping ${
+      className={`group flex flex-col h-full rounded-[2rem] overflow-hidden border cursor-pointer transition-all duration-500 will-change-transform hover:-translate-y-2 fix-clipping ${
         theme === 'dark' 
-          ? 'bg-slate-900 border-slate-800 hover:border-fuzzi-blue/50' 
-          : 'bg-white border-fuzzi-blue/5 hover:border-fuzzi-blue/20 shadow-sm hover:shadow-2xl hover:shadow-fuzzi-blue/10'
+          ? 'bg-slate-900 border-slate-800 hover:border-fuzzi-blue/50 shadow-2xl shadow-black/30' 
+          : 'bg-white border-slate-100 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.06)] hover:shadow-[0_40px_80px_-15px_rgba(0,0,0,0.1)]'
       }`}
       onClick={() => onSelect(product)}
     >
@@ -40,7 +40,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, theme, onEdit, onDel
           }}
         />
         
-        {/* Overlay "Ver Detalhes" - Visível por padrão no Mobile, Hover no Desktop */}
         <div className="absolute inset-0 bg-black/40 lg:bg-black/60 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
           <div className="bg-white/90 backdrop-blur-sm text-fuzzi-gray px-4 py-2 rounded-full font-bold flex items-center gap-2 transform lg:translate-y-4 lg:group-hover:translate-y-0 transition-transform duration-300 shadow-lg scale-90 lg:scale-100">
             <Maximize2 className="w-4 h-4 text-fuzzi-blue" /> <span className="text-xs lg:text-sm">Ver Detalhes</span>

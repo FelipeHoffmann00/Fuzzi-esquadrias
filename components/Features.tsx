@@ -62,10 +62,10 @@ const Features: React.FC<FeaturesProps> = ({ theme }) => {
         {FEATURES.map((feature, index) => (
           <div 
             key={index}
-            className={`group p-6 md:p-10 rounded-3xl md:rounded-[2.5rem] border transition-all duration-500 will-change-transform hover:-translate-y-2 flex flex-col ${
+            className={`group p-6 md:p-10 rounded-3xl md:rounded-[2.5rem] transition-all duration-500 will-change-transform hover:-translate-y-3 flex flex-col ${
               theme === 'dark' 
-                ? 'bg-slate-900/50 border-slate-800 hover:border-fuzzi-blue/50 hover:bg-slate-900 shadow-2xl shadow-black/20' 
-                : 'bg-white border-transparent shadow-[0_15px_40px_-12px_rgba(0,0,0,0.06)] hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.12)] text-slate-900'
+                ? 'bg-slate-900/50 border border-slate-800 hover:border-fuzzi-blue/50 hover:bg-slate-900 shadow-2xl shadow-black/20' 
+                : 'bg-white border border-slate-100 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.08)] hover:shadow-[0_40px_80px_-15px_rgba(0,0,0,0.12)] text-slate-900'
             }`}
           >
             <div className={`w-12 h-12 md:w-16 md:h-16 rounded-2xl md:rounded-[1.25rem] flex items-center justify-center mb-5 md:mb-8 transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 will-change-transform ${
