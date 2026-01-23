@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Product, Testimonial, Theme, View, CatalogPDF } from './types';
 import { INITIAL_PRODUCTS, INITIAL_TESTIMONIALS, INITIAL_PDF_CATALOGS, WHATSAPP_NUMBER } from './constants';
+import { supabase, uploadImage } from './supabase';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import AdminModal from './components/AdminModal';
@@ -12,9 +13,8 @@ import Testimonials from './components/Testimonials';
 import Features from './components/Features';
 import ProductDetail from './components/ProductDetail'; 
 import ProductCard from './components/ProductCard'; 
-import WhatsAppIcon from './components/WhatsAppIcon';
 import ConfirmModal from './components/ConfirmModal'; 
-import { FileText, ExternalLink } from 'lucide-react';
+import { FileText, Loader2 } from 'lucide-react';
 
 const DEFAULT_HERO_IMAGE = "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1200";
 
@@ -25,11 +25,11 @@ const App: React.FC = () => {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [pdfCatalogs, setPdfCatalogs] = useState<CatalogPDF[]>([]);
   const [heroImage, setHeroImage] = useState<string>(DEFAULT_HERO_IMAGE);
+  const [isLoading, setIsLoading] = useState(true);
   
   const [isAdminProductOpen, setIsAdminProductOpen] = useState(false);
   const [isAdminTestimonialOpen, setIsAdminTestimonialOpen] = useState(false);
   const [isAdminPDFOpen, setIsAdminPDFOpen] = useState(false);
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   
   const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
@@ -43,85 +43,120 @@ const App: React.FC = () => {
     id: string | null;
   }>({ isOpen: false, type: null, id: null });
 
-  // Carregamento Inicial
+  // Carregamento de dados do Supabase
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      // Buscar Produtos
+      const { data: prods, error: prodErr } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (prods && prods.length > 0) setProducts(prods);
+      else setProducts(INITIAL_PRODUCTS);
+
+      // Buscar Depoimentos
+      const { data: tests, error: testErr } = await supabase
+        .from('testimonials')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (tests && tests.length > 0) setTestimonials(tests);
+      else setTestimonials(INITIAL_TESTIMONIALS);
+
+      // Buscar Configurações (Hero e Catálogo)
+      const { data: config } = await supabase.from('site_config').select('*');
+      const heroCfg = config?.find(c => c.key === 'hero_image');
+      const pdfCfg = config?.find(c => c.key === 'catalog');
+
+      if (heroCfg) setHeroImage(heroCfg.value.url);
+      if (pdfCfg) setPdfCatalogs([pdfCfg.value]);
+      else setPdfCatalogs(INITIAL_PDF_CATALOGS);
+
+    } catch (e) {
+      console.error("Erro ao carregar dados do Supabase:", e);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
+    fetchData();
+    const savedTheme = localStorage.getItem('fuzzi_theme') as Theme;
+    if (savedTheme) setTheme(savedTheme);
+  }, [fetchData]);
+
+  const handleHeroChange = async (base64OrUrl: string) => {
+    const publicUrl = await uploadImage(base64OrUrl, 'hero');
+    setHeroImage(publicUrl);
+    await supabase.from('site_config').upsert({ key: 'hero_image', value: { url: publicUrl } });
+  };
+
+  const handleSaveProduct = async (product: Product) => {
+    setIsLoading(true);
     try {
-      const savedProducts = localStorage.getItem('fuzzi_products');
-      setProducts(savedProducts ? JSON.parse(savedProducts) : INITIAL_PRODUCTS);
+      // Upload de imagens novas (as que são base64)
+      const uploadedImages = await Promise.all(
+        product.images.map(img => img.startsWith('data:') ? uploadImage(img, 'products') : img)
+      );
 
-      const savedTestimonials = localStorage.getItem('fuzzi_testimonials');
-      setTestimonials(savedTestimonials ? JSON.parse(savedTestimonials) : INITIAL_TESTIMONIALS);
-
-      const savedPDFs = localStorage.getItem('fuzzi_pdfs');
-      setPdfCatalogs(savedPDFs ? JSON.parse(savedPDFs) : INITIAL_PDF_CATALOGS);
-
-      const savedHero = localStorage.getItem('fuzzi_hero_image');
-      if (savedHero) setHeroImage(savedHero);
-
-      const savedTheme = localStorage.getItem('fuzzi_theme') as Theme;
-      if (savedTheme) setTheme(savedTheme);
+      const productToSave = { ...product, images: uploadedImages };
+      
+      const { error } = await supabase.from('products').upsert(productToSave);
+      if (error) throw error;
+      
+      await fetchData();
+      setIsAdminProductOpen(false);
+      setIsEditing(false);
     } catch (e) {
-      console.warn("Erro ao carregar dados.", e);
-      setProducts(INITIAL_PRODUCTS);
-      setTestimonials(INITIAL_TESTIMONIALS);
-      setPdfCatalogs(INITIAL_PDF_CATALOGS);
+      alert("Erro ao salvar produto no banco de dados.");
+    } finally {
+      setIsLoading(false);
     }
-  }, []);
+  };
 
-  // Função de salvamento imediato para evitar perdas
-  const persistData = useCallback((key: string, data: any) => {
+  const handleSavePDF = async (pdf: CatalogPDF) => {
+    setIsLoading(true);
     try {
-      localStorage.setItem(key, typeof data === 'string' ? data : JSON.stringify(data));
+      const coverUrl = pdf.coverImage.startsWith('data:') ? await uploadImage(pdf.coverImage, 'catalogs') : pdf.coverImage;
+      const pdfToSave = { ...pdf, coverImage: coverUrl };
+      
+      await supabase.from('site_config').upsert({ key: 'catalog', value: pdfToSave });
+      await fetchData();
+      setIsAdminPDFOpen(false);
     } catch (e) {
-      console.error("Erro Crítico de Armazenamento: LocalStorage cheio.", e);
-      alert("A memória do navegador está cheia. Tente remover produtos antigos ou usar fotos menores.");
+      alert("Erro ao salvar catálogo.");
+    } finally {
+      setIsLoading(false);
     }
-  }, []);
-
-  const handleHeroChange = (imageUrl: string) => {
-    setHeroImage(imageUrl);
-    persistData('fuzzi_hero_image', imageUrl);
   };
 
-  const handleSaveProduct = (product: Product) => {
-    const newProducts = products.find(p => p.id === product.id)
-      ? products.map(p => p.id === product.id ? product : p)
-      : [product, ...products];
-    
-    setProducts(newProducts);
-    persistData('fuzzi_products', newProducts);
-    setIsAdminProductOpen(false);
-    setIsEditing(false);
-  };
+  const handleSaveTestimonial = async (testimonial: Testimonial) => {
+    setIsLoading(true);
+    try {
+      const imageUrl = testimonial.image.startsWith('data:') ? await uploadImage(testimonial.image, 'testimonials') : testimonial.image;
+      const testimonialToSave = { ...testimonial, image: imageUrl };
 
-  const handleSavePDF = (pdf: CatalogPDF) => {
-    const newPDFs = [pdf];
-    setPdfCatalogs(newPDFs);
-    persistData('fuzzi_pdfs', newPDFs);
-    setIsAdminPDFOpen(false);
-  };
-
-  const handleSaveTestimonial = (testimonial: Testimonial) => {
-    const newTestimonials = testimonials.find(t => t.id === testimonial.id)
-      ? testimonials.map(t => t.id === testimonial.id ? testimonial : t)
-      : [testimonial, ...testimonials].slice(0, 5);
-    
-    setTestimonials(newTestimonials);
-    persistData('fuzzi_testimonials', newTestimonials);
-    setIsAdminTestimonialOpen(false);
-  };
-
-  const executeDelete = () => {
-    if (confirmDelete.type === 'product' && confirmDelete.id) {
-      const newProducts = products.filter(p => p.id !== confirmDelete.id);
-      setProducts(newProducts);
-      persistData('fuzzi_products', newProducts);
-    } else if (confirmDelete.type === 'testimonial' && confirmDelete.id) {
-      const newTestimonials = testimonials.filter(t => t.id !== confirmDelete.id);
-      setTestimonials(newTestimonials);
-      persistData('fuzzi_testimonials', newTestimonials);
+      await supabase.from('testimonials').upsert(testimonialToSave);
+      await fetchData();
+      setIsAdminTestimonialOpen(false);
+    } catch (e) {
+      alert("Erro ao salvar depoimento.");
+    } finally {
+      setIsLoading(false);
     }
-    setConfirmDelete({ isOpen: false, type: null, id: null });
+  };
+
+  const executeDelete = async () => {
+    if (!confirmDelete.id) return;
+    setIsLoading(true);
+    try {
+      const table = confirmDelete.type === 'product' ? 'products' : 'testimonials';
+      await supabase.from(table).delete().eq('id', confirmDelete.id);
+      await fetchData();
+    } finally {
+      setIsLoading(false);
+      setConfirmDelete({ isOpen: false, type: null, id: null });
+    }
   };
 
   const toggleTheme = () => {
@@ -135,7 +170,6 @@ const App: React.FC = () => {
   };
 
   const mainCatalog = pdfCatalogs[0] || INITIAL_PDF_CATALOGS[0];
-  const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER.replace(/\D/g, '')}`;
 
   return (
     <div className={`min-h-screen transition-theme flex flex-col overflow-x-hidden ${theme === 'dark' ? 'bg-slate-950 text-white' : 'bg-white text-slate-900'}`}>
@@ -143,9 +177,19 @@ const App: React.FC = () => {
         theme={theme} view={view} setView={setView} toggleTheme={toggleTheme} 
         openAdminProduct={() => { setCurrentProduct(null); setIsEditing(false); setIsAdminProductOpen(true); }} 
         openAdminPDF={() => setIsAdminPDFOpen(true)} 
-        openAdminTestimonial={() => { if(testimonials.length >= 5) return alert("Limite de 5 atingido"); setCurrentTestimonial(null); setIsAdminTestimonialOpen(true); }}
+        openAdminTestimonial={() => { if(testimonials.length >= 10) return alert("Limite de 10 atingido"); setCurrentTestimonial(null); setIsAdminTestimonialOpen(true); }}
         isAdmin={isAdminAuthenticated} testimonialsCount={testimonials.length}
       />
+
+      {isLoading && (
+        <div className="fixed inset-0 z-[200] bg-black/20 backdrop-blur-sm flex items-center justify-center">
+          <div className="bg-white dark:bg-slate-900 p-8 rounded-[2rem] shadow-2xl flex flex-col items-center gap-4">
+            <Loader2 className="w-12 h-12 text-fuzzi-blue animate-spin" />
+            <span className="font-black text-xs uppercase tracking-widest text-fuzzi-blue">Sincronizando...</span>
+          </div>
+        </div>
+      )}
+
       <main className="flex-grow">
         <section id="inicio" className="container mx-auto px-4 pt-24 min-h-[90vh] md:min-h-screen">
           <Hero theme={theme} setView={setView} heroImage={heroImage} isAdmin={isAdminAuthenticated} onHeroImageChange={handleHeroChange} />
@@ -181,7 +225,7 @@ const App: React.FC = () => {
         </section>
         <section id="depoimentos" className="py-10"><Testimonials theme={theme} testimonials={testimonials} isAdmin={isAdminAuthenticated} onEdit={(t)=>{setCurrentTestimonial(t);setIsAdminTestimonialOpen(true)}} onDelete={(id)=>setConfirmDelete({isOpen:true, type:'testimonial', id})} /></section>
       </main>
-      <Footer theme={theme} isAdmin={isAdminAuthenticated} onAdminToggle={()=>setIsAdminAuthenticated(false)} onLogin={onLoginSuccess} setView={setView} setIsLoginOpen={setIsLoginOpen} isLoginOpen={isLoginOpen} />
+      <Footer theme={theme} isAdmin={isAdminAuthenticated} onAdminToggle={()=>setIsAdminAuthenticated(false)} onLogin={onLoginSuccess} setView={setView} setIsLoginOpen={()=>{}} isLoginOpen={false} />
       {selectedProduct && <ProductDetail product={selectedProduct} theme={theme} onClose={()=>setSelectedProduct(null)} />}
       {isAdminProductOpen && <AdminModal theme={theme} onClose={()=>setIsAdminProductOpen(false)} onSave={handleSaveProduct} editProduct={currentProduct} isEditing={isEditing} />}
       {isAdminTestimonialOpen && <TestimonialModal theme={theme} onClose={()=>setIsAdminTestimonialOpen(false)} onSave={handleSaveTestimonial} editTestimonial={currentTestimonial} />}

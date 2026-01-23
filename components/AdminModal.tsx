@@ -38,7 +38,8 @@ const AdminModal: React.FC<AdminModalProps> = ({ theme, onClose, onSave, editPro
     const selectedFiles = e.target.files;
     if (!selectedFiles || selectedFiles.length === 0) return;
 
-    const filesArray = Array.from(selectedFiles);
+    // Fixed error on line 58: Explicitly cast to File[] to avoid 'unknown' type issues when accessing by index
+    const filesArray = Array.from(selectedFiles) as File[];
     const currentCount = images.length;
     
     if (currentCount >= MAX_IMAGES) {
