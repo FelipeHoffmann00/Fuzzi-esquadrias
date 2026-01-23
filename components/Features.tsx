@@ -49,7 +49,7 @@ interface FeaturesProps {
 const Features: React.FC<FeaturesProps> = ({ theme }) => {
   return (
     <div className="container mx-auto px-4">
-      <div className="text-center mb-10 md:mb-16">
+      <div className="text-center mb-10 md:mb-12">
         <h2 className={`text-3xl md:text-5xl font-black mb-4 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
           Por que escolher a <br className="md:hidden" /> <span className="text-fuzzi-blue">Fuzzi?</span>
         </h2>

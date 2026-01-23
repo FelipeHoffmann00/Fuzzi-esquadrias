@@ -194,31 +194,25 @@ const App: React.FC = () => {
 
       {isLoading && (
         <div className="fixed inset-0 z-[200] bg-black/40 backdrop-blur-md flex items-center justify-center">
-          <div className="bg-white dark:bg-slate-900 p-10 rounded-[3rem] shadow-2xl flex flex-col items-center gap-6 animate-in zoom-in-95">
-            <div className="relative">
-              <Loader2 className="w-16 h-16 text-fuzzi-blue animate-spin" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-2 h-2 bg-fuzzi-blue rounded-full animate-ping"></div>
-              </div>
-            </div>
-            <div className="text-center">
-              <span className="font-black text-[10px] uppercase tracking-[0.3em] text-fuzzi-blue block">Nuvem Fuzzi</span>
-              <span className="text-sm font-bold opacity-60">Sincronizando dados...</span>
+          <div className="relative animate-in zoom-in-95 duration-500">
+            <Loader2 className="w-20 h-20 text-fuzzi-blue animate-spin" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-3 h-3 bg-fuzzi-blue rounded-full animate-ping"></div>
             </div>
           </div>
         </div>
       )}
 
       <main className="flex-grow">
-        <section id="inicio" className="container mx-auto px-4 pt-24 min-h-[90vh] md:min-h-screen scroll-mt-24">
+        <section id="inicio" className="container mx-auto px-4 pt-24 min-h-[90vh] md:min-h-screen scroll-mt-44">
           <Hero theme={theme} setView={setView} heroImage={heroImage} isAdmin={isAdminAuthenticated} onHeroImageChange={handleHeroChange} />
         </section>
         
-        <section id="diferenciais" className="py-10 md:py-24 scroll-mt-24">
+        <div id="diferenciais" className="scroll-mt-44 py-16 md:py-24">
           <Features theme={theme} />
-        </section>
+        </div>
         
-        <section id="produtos" className="container mx-auto px-4 py-10 md:py-20 scroll-mt-24">
+        <section id="produtos" className="container mx-auto px-4 py-16 md:py-32 scroll-mt-44">
           <div className="mb-12 text-center md:text-left">
             <span className="text-fuzzi-blue font-black uppercase tracking-[0.3em] text-[10px] block mb-4">Nossa Vitrine</span>
             <h2 className="text-4xl md:text-6xl font-black">Projetos de <span className="text-fuzzi-blue">Alto Padrão</span></h2>
@@ -230,12 +224,10 @@ const App: React.FC = () => {
           </div>
         </section>
 
-        <section id="catalogo" className="py-10 md:py-24 scroll-mt-24">
+        <section id="catalogo" className="py-16 md:py-32 scroll-mt-44">
           <div className="container mx-auto px-4">
             <div className={`relative overflow-hidden rounded-[2.5rem] md:rounded-[4rem] border shadow-2xl ${theme === 'dark' ? 'bg-[#0a0f1a] border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
               <div className="grid grid-cols-1 lg:grid-cols-2 items-stretch">
-                
-                {/* Lado Esquerdo: Conteúdo */}
                 <div className="p-8 md:p-16 lg:p-24 flex flex-col justify-center space-y-8 md:space-y-10">
                   <div className="space-y-4">
                     <div className="inline-flex items-center gap-2 px-4 py-2 bg-fuzzi-blue/20 text-fuzzi-blue text-[10px] font-black uppercase tracking-widest rounded-full border border-fuzzi-blue/20">
@@ -248,48 +240,28 @@ const App: React.FC = () => {
                       Confira as especificações técnicas, detalhes construtivos e opções de acabamentos exclusivos.
                     </p>
                   </div>
-
-                  {/* Botões */}
                   <div className="flex flex-col sm:flex-row gap-4">
-                    <a 
-                      href={mainCatalog?.pdfUrl} 
-                      target="_blank" 
-                      className="group flex items-center justify-center gap-3 px-8 py-5 bg-fuzzi-blue text-white font-black rounded-2xl shadow-xl shadow-fuzzi-blue/20 hover:scale-105 transition-all active:scale-95 text-sm uppercase tracking-wider"
-                    >
-                      Veja nosso catálogo
-                      <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    <a href={mainCatalog?.pdfUrl} target="_blank" className="group flex items-center justify-center gap-3 px-8 py-5 bg-fuzzi-blue text-white font-black rounded-2xl shadow-xl shadow-fuzzi-blue/20 hover:scale-105 transition-all active:scale-95 text-sm uppercase tracking-wider">
+                      Veja nosso catálogo <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                     </a>
-                    
-                    <a 
-                      href={whatsappUrl}
-                      target="_blank" 
-                      className="flex items-center justify-center gap-3 px-8 py-5 bg-[#25D366] text-white font-black rounded-2xl shadow-xl shadow-[#25D366]/20 hover:scale-105 transition-all active:scale-95 text-sm uppercase tracking-wider"
-                    >
-                      <WhatsAppIcon className="w-5 h-5 fill-white" />
-                      Fale com um vendedor
+                    <a href={whatsappUrl} target="_blank" className="flex items-center justify-center gap-3 px-8 py-5 bg-[#25D366] text-white font-black rounded-2xl shadow-xl shadow-[#25D366]/20 hover:scale-105 transition-all active:scale-95 text-sm uppercase tracking-wider">
+                      <WhatsAppIcon className="w-5 h-5 fill-white" /> Fale com um vendedor
                     </a>
                   </div>
                 </div>
-
-                {/* Lado Direito: Imagem */}
                 <div className="relative min-h-[400px] lg:min-h-full">
-                  <img 
-                    src={mainCatalog?.coverImage || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1200'} 
-                    className="absolute inset-0 w-full h-full object-cover"
-                    alt="Capa do Catálogo"
-                  />
-                  {/* Overlay Gradiente para integração visual */}
+                  <img src={mainCatalog?.coverImage || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1200'} className="absolute inset-0 w-full h-full object-cover" alt="Capa do Catálogo" />
                   <div className={`absolute inset-0 lg:bg-gradient-to-r ${theme === 'dark' ? 'from-[#0a0f1a] via-transparent to-transparent' : 'from-slate-50 via-transparent to-transparent'}`}></div>
                 </div>
-
               </div>
             </div>
           </div>
         </section>
 
-        <section id="depoimentos" className="py-10 scroll-mt-24">
+        <div id="depoimentos" className="scroll-mt-44 py-16 md:py-24">
           <Testimonials theme={theme} testimonials={testimonials} isAdmin={isAdminAuthenticated} onEdit={(t)=>{setCurrentTestimonial(t);setIsAdminTestimonialOpen(true)}} onDelete={(id)=>setConfirmDelete({isOpen:true, type:'testimonial', id})} />
-        </section>
+        </div>
+        <div className="pb-32"></div> {/* Spacer para garantir que o scroll chegue ao fim */}
       </main>
       <Footer theme={theme} isAdmin={isAdminAuthenticated} onAdminToggle={()=>setIsAdminAuthenticated(false)} onLogin={onLoginSuccess} setView={setView} setIsLoginOpen={()=>{}} isLoginOpen={false} />
       {selectedProduct && <ProductDetail product={selectedProduct} theme={theme} onClose={()=>setSelectedProduct(null)} />}
