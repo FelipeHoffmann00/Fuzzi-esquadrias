@@ -11,6 +11,8 @@ interface AdminModalProps {
   isEditing: boolean;
 }
 
+const MAX_IMAGES = 15;
+
 const AdminModal: React.FC<AdminModalProps> = ({ theme, onClose, onSave, editProduct, isEditing }) => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -32,15 +34,31 @@ const AdminModal: React.FC<AdminModalProps> = ({ theme, onClose, onSave, editPro
   }, [editProduct, isEditing]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
+    const selectedFiles = e.target.files;
+    if (!selectedFiles || selectedFiles.length === 0) return;
+
+    const filesArray = Array.from(selectedFiles);
+    const currentCount = images.length;
+    
+    if (currentCount >= MAX_IMAGES) {
+      setError(`Limite de ${MAX_IMAGES} fotos atingido.`);
+      e.target.value = '';
+      return;
+    }
+
+    const availableSlots = MAX_IMAGES - currentCount;
+    const filesToProcess = filesArray.slice(0, availableSlots);
+
+    if (filesArray.length > availableSlots) {
+      setError(`Apenas ${availableSlots} fotos foram adicionadas. Limite de ${MAX_IMAGES} fotos por destaque.`);
+    }
 
     setIsProcessing(true);
     const newImages: string[] = [];
 
-    for (let i = 0; i < files.length; i++) {
+    for (let i = 0; i < filesToProcess.length; i++) {
       try {
-        const base64 = await resizeImage(files[i]);
+        const base64 = await resizeImage(filesToProcess[i]);
         newImages.push(base64);
       } catch (err) {
         console.error("Erro ao processar imagem", err);
@@ -70,7 +88,7 @@ const AdminModal: React.FC<AdminModalProps> = ({ theme, onClose, onSave, editPro
             ctx.imageSmoothingEnabled = true;
             ctx.imageSmoothingQuality = 'high';
             ctx.drawImage(img, 0, 0, width, height);
-            resolve(canvas.toDataURL('image/jpeg', 1.0));
+            resolve(canvas.toDataURL('image/jpeg', 0.9));
           } else {
             reject(new Error("Erro ao criar contexto 2D"));
           }
@@ -82,6 +100,7 @@ const AdminModal: React.FC<AdminModalProps> = ({ theme, onClose, onSave, editPro
 
   const removeImage = (index: number) => {
     setImages(prev => prev.filter((_, i) => i !== index));
+    if (error && error.includes('Limite')) setError(null);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -103,6 +122,8 @@ const AdminModal: React.FC<AdminModalProps> = ({ theme, onClose, onSave, editPro
 
     onSave(product);
   };
+
+  const isLimitReached = images.length >= MAX_IMAGES;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-300">
@@ -175,27 +196,43 @@ const AdminModal: React.FC<AdminModalProps> = ({ theme, onClose, onSave, editPro
           </div>
 
           <div className="space-y-4">
-            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Mídias do Produto*</label>
+            <div className="flex justify-between items-end">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Mídias do Produto*</label>
+              <span className={`text-[10px] font-black ${images.length >= MAX_IMAGES ? 'text-red-500' : 'text-fuzzi-blue'}`}>
+                {images.length} / {MAX_IMAGES} fotos
+              </span>
+            </div>
+            
             <div className="flex gap-4">
               <button 
                 type="button"
+                disabled={isLimitReached || isProcessing}
                 onClick={() => fileInputRef.current?.click()}
-                className={`flex-1 flex flex-col items-center justify-center gap-2 p-7 rounded-[2rem] border-2 border-dashed transition-[border-color,color,background-color] duration-200 hover:border-fuzzi-blue hover:bg-fuzzi-blue/5 ${
-                  theme === 'dark' ? 'bg-slate-800/50 border-slate-700 text-slate-500' : 'bg-fuzzi-blue/5 border-fuzzi-blue/10 text-fuzzi-blue'
+                className={`flex-1 flex flex-col items-center justify-center gap-2 p-7 rounded-[2rem] border-2 border-dashed transition-all duration-200 ${
+                  isLimitReached 
+                    ? 'opacity-50 cursor-not-allowed bg-slate-100 dark:bg-slate-800 border-slate-300 text-slate-400'
+                    : `hover:border-fuzzi-blue hover:bg-fuzzi-blue/5 ${theme === 'dark' ? 'bg-slate-800/50 border-slate-700 text-slate-500' : 'bg-fuzzi-blue/5 border-fuzzi-blue/10 text-fuzzi-blue'}`
                 }`}
               >
                 <ImageIcon className="w-8 h-8" />
-                <span className="text-[10px] font-black uppercase">Galeria</span>
+                <span className="text-[10px] font-black uppercase">
+                  {isLimitReached ? 'Limite Atingido' : 'Galeria'}
+                </span>
               </button>
               <button 
                 type="button"
+                disabled={isLimitReached || isProcessing}
                 onClick={() => cameraInputRef.current?.click()}
-                className={`flex-1 flex flex-col items-center justify-center gap-2 p-7 rounded-[2rem] border-2 border-dashed transition-[border-color,color,background-color] duration-200 hover:border-fuzzi-blue hover:bg-fuzzi-blue/5 ${
-                  theme === 'dark' ? 'bg-slate-800/50 border-slate-700 text-slate-500' : 'bg-fuzzi-blue/5 border-fuzzi-blue/10 text-fuzzi-blue'
+                className={`flex-1 flex flex-col items-center justify-center gap-2 p-7 rounded-[2rem] border-2 border-dashed transition-all duration-200 ${
+                  isLimitReached 
+                    ? 'opacity-50 cursor-not-allowed bg-slate-100 dark:bg-slate-800 border-slate-300 text-slate-400'
+                    : `hover:border-fuzzi-blue hover:bg-fuzzi-blue/5 ${theme === 'dark' ? 'bg-slate-800/50 border-slate-700 text-slate-500' : 'bg-fuzzi-blue/5 border-fuzzi-blue/10 text-fuzzi-blue'}`
                 }`}
               >
                 <Camera className="w-8 h-8" />
-                <span className="text-[10px] font-black uppercase">Tirar Foto</span>
+                <span className="text-[10px] font-black uppercase">
+                  {isLimitReached ? 'Limite Atingido' : 'Tirar Foto'}
+                </span>
               </button>
             </div>
 

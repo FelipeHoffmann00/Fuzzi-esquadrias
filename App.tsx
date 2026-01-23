@@ -246,10 +246,10 @@ const App: React.FC = () => {
                         Confira todos os detalhes técnicos, acabamentos e tipologias disponíveis em nossa linha premium. Um material completo para arquitetos e clientes exigentes.
                       </p>
                       <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                        <a href={mainCatalog?.pdfUrl || '#'} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 lg:px-10 py-4 lg:py-5 bg-fuzzi-blue text-white font-black rounded-xl lg:rounded-2xl hover:brightness-110 transition-all shadow-xl shadow-fuzzi-blue/20 active:scale-95 text-base lg:text-lg">
+                        <a href={mainCatalog?.pdfUrl || '#'} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 lg:px-10 py-4 lg:py-5 bg-fuzzi-blue text-white font-black rounded-xl lg:rounded-2xl hover:brightness-110 transition-all shadow-xl shadow-fuzzi-blue/40 shadow-[0_0_20px_-5px_rgba(0,207,255,0.4)] active:scale-95 text-base lg:text-lg whitespace-nowrap">
                           <ExternalLink className="w-5 h-5 lg:w-6 lg:h-6" /> Acessar Catálogo
                         </a>
-                        <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className={`w-full sm:w-auto group flex items-center justify-center gap-3 px-8 lg:px-10 py-4 lg:py-5 font-black rounded-xl lg:rounded-2xl border-2 transition-all duration-300 active:scale-95 text-base lg:text-lg hover:bg-[#25D366] hover:border-[#25D366] hover:text-white ${theme === 'dark' ? 'border-slate-800 text-white' : 'border-slate-200 text-slate-600 bg-white shadow-sm'}`}>
+                        <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className={`w-full sm:w-auto group flex items-center justify-center gap-3 px-8 lg:px-10 py-4 lg:py-5 font-black rounded-xl lg:rounded-2xl border-2 transition-all duration-300 active:scale-95 text-base lg:text-lg whitespace-nowrap hover:bg-[#25D366] hover:border-[#25D366] hover:text-white ${theme === 'dark' ? 'bg-slate-950/50 border-slate-800 text-white shadow-lg' : 'border-slate-200 text-slate-600 bg-white shadow-sm'}`}>
                           <WhatsAppIcon className="w-5 h-5 lg:w-6 lg:h-6 text-[#25D366] group-hover:text-white transition-colors" />
                           Falar com um vendedor
                         </a>
