@@ -41,14 +41,13 @@ const Footer: React.FC<FooterProps> = ({ theme, isAdmin, onAdminToggle, onLogin,
 
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === '123') {
+    if (password === '12') {
       onLogin(password);
       setShowPasswordInput(false);
       setPassword('');
       setError(false);
     } else {
       setError(true);
-      // Mantém o erro visível por 3 segundos para dar tempo de ler
       setTimeout(() => setError(false), 3000);
     }
   };

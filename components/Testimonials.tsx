@@ -96,9 +96,9 @@ const Testimonials: React.FC<TestimonialsProps> = ({ theme, testimonials, isAdmi
   if (testimonials.length === 0) return null;
 
   return (
-    <section className="pt-20 pb-12 md:pt-32 md:pb-20 relative z-20 select-none overflow-visible">
+    <div className="pt-8 pb-4 md:pt-32 md:pb-20 relative z-20 select-none overflow-visible">
       <div className="container mx-auto px-4 overflow-visible">
-        {/* Cabeçalho - Espaçamento reduzido no mb (margin bottom) para colar nos cards e aumentado no topo da section */}
+        {/* Cabeçalho */}
         <div className="max-w-7xl mx-auto mb-4 md:mb-6">
           <div className="text-left">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-fuzzi-blue/10 text-fuzzi-blue text-[10px] font-black uppercase tracking-[0.2em] mb-4 md:mb-6 border border-fuzzi-blue/5 shadow-sm">
@@ -209,7 +209,7 @@ const Testimonials: React.FC<TestimonialsProps> = ({ theme, testimonials, isAdmi
         </div>
 
         {/* INDICADORES */}
-        <div className="mt-0 max-w-xs mx-auto space-y-2">
+        <div className="mt-8 max-w-xs mx-auto space-y-2">
           <div className={`h-1 w-full rounded-full overflow-hidden ${theme === 'dark' ? 'bg-slate-800' : 'bg-slate-100'}`}>
             <div className="h-full bg-fuzzi-blue transition-all duration-300 ease-linear" style={{ width: `${progress}%` }}></div>
           </div>
@@ -220,7 +220,7 @@ const Testimonials: React.FC<TestimonialsProps> = ({ theme, testimonials, isAdmi
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 };
 

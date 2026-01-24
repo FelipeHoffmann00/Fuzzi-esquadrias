@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Product, Testimonial, Theme, View, CatalogPDF } from './types';
 import { INITIAL_PRODUCTS, INITIAL_TESTIMONIALS, INITIAL_PDF_CATALOGS, WHATSAPP_NUMBER } from './constants';
 import { supabase, uploadImage } from './supabase';
@@ -15,7 +15,7 @@ import ProductDetail from './components/ProductDetail';
 import ProductGrid from './components/ProductGrid'; 
 import ConfirmModal from './components/ConfirmModal'; 
 import WhatsAppIcon from './components/WhatsAppIcon';
-import { FileText, Loader2, ArrowRight } from 'lucide-react';
+import { Loader2, ArrowRight, FileText } from 'lucide-react';
 
 const DEFAULT_HERO_IMAGE = "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1200";
 
@@ -36,7 +36,11 @@ const App: React.FC = () => {
   const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
   const [currentTestimonial, setCurrentTestimonial] = useState<Testimonial | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null); 
-  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+  
+  // No futuro, isso deve ser substituído por supabase.auth.getSession()
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(() => {
+    return localStorage.getItem('fuzzi_admin_session') === 'active';
+  });
 
   const [confirmDelete, setConfirmDelete] = useState<{
     isOpen: boolean;
@@ -45,7 +49,6 @@ const App: React.FC = () => {
   }>({ isOpen: false, type: null, id: null });
 
   const fetchData = useCallback(async () => {
-    setIsLoading(true);
     try {
       const { data: prods } = await supabase.from('products').select('*').order('created_at', { ascending: false });
       if (prods && prods.length > 0) setProducts(prods);
@@ -176,14 +179,22 @@ const App: React.FC = () => {
   };
 
   const onLoginSuccess = (password: string) => {
-    if (password === '123') setIsAdminAuthenticated(true);
+    if (password === '12') { 
+      setIsAdminAuthenticated(true);
+      localStorage.setItem('fuzzi_admin_session', 'active');
+    }
+  };
+
+  const onLogout = () => {
+    setIsAdminAuthenticated(false);
+    localStorage.removeItem('fuzzi_admin_session');
   };
 
   const mainCatalog = pdfCatalogs[0] || INITIAL_PDF_CATALOGS[0];
   const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER.replace(/\D/g, '')}?text=${encodeURIComponent("Olá! Gostaria de falar com um vendedor sobre os produtos da Fuzzi.")}`;
 
   return (
-    <div className={`min-h-screen transition-theme flex flex-col overflow-x-hidden ${theme === 'dark' ? 'bg-slate-950 text-white' : 'bg-white text-slate-900'}`}>
+    <div className={`min-h-screen transition-theme flex flex-col overflow-x-hidden ${theme === 'dark' ? 'bg-[#050a14] text-white' : 'bg-white text-slate-900'}`}>
       <Header 
         theme={theme} view={view} setView={setView} toggleTheme={toggleTheme} 
         openAdminProduct={() => { setCurrentProduct(null); setIsEditing(false); setIsAdminProductOpen(true); }} 
@@ -193,21 +204,20 @@ const App: React.FC = () => {
       />
 
       {isLoading && (
-        <div className="fixed inset-0 z-[200] bg-black/20 backdrop-blur-sm flex items-center justify-center">
+        <div className="fixed inset-0 z-[200] bg-[#050a14]/60 backdrop-blur-xl flex flex-col items-center justify-center gap-4">
           <Loader2 className="w-12 h-12 text-fuzzi-blue animate-spin" />
+          <p className="text-fuzzi-blue font-bold tracking-widest text-[10px] uppercase animate-pulse">Carregando Fuzzi Esquadrias...</p>
         </div>
       )}
 
-      <main className="flex-grow">
-        {/* INICIO alinhado no topo */}
+      <main className={`flex-grow transition-opacity duration-700 ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
         <section id="inicio" className="container mx-auto px-4 pt-24 pb-12 md:pb-20 min-h-[90vh] flex items-center scroll-mt-24">
           <Hero theme={theme} setView={setView} heroImage={heroImage} isAdmin={isAdminAuthenticated} onHeroImageChange={handleHeroChange} />
         </section>
 
-        {/* Demais seções com scroll-mt para facilitar a centralização perfeita */}
         <section id="diferenciais" className="py-12 md:py-24 scroll-mt-24"><Features theme={theme} /></section>
         
-        <section id="destaques" className="container mx-auto px-4 py-12 md:py-24 scroll-mt-24">
+        <section id="destaques" className="container mx-auto px-4 py-8 md:py-24 scroll-mt-24">
           <div className="max-w-7xl mx-auto mb-10">
             <div className="text-left">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-fuzzi-blue/10 text-fuzzi-blue text-[10px] font-black uppercase tracking-[0.2em] mb-4 md:mb-6 border border-fuzzi-blue/5 shadow-sm">
@@ -236,25 +246,25 @@ const App: React.FC = () => {
           </div>
         </section>
 
-        <section id="depoimentos" className="py-12 md:py-24 scroll-mt-24 min-h-[90vh] flex items-center">
+        <section id="depoimentos" className="pt-8 pb-10 md:py-24 scroll-mt-24 md:min-h-[90vh] flex items-center">
           <div className="w-full">
             <Testimonials theme={theme} testimonials={testimonials} isAdmin={isAdminAuthenticated} onEdit={(t)=>{setCurrentTestimonial(t);setIsAdminTestimonialOpen(true)}} onDelete={(id)=>setConfirmDelete({isOpen:true, type:'testimonial', id})} />
           </div>
         </section>
 
-        <section id="catalogo" className="py-12 md:py-32 scroll-mt-24 min-h-[90vh] flex items-center">
+        <section id="catalogo" className="pt-10 pb-12 md:py-32 scroll-mt-24 md:min-h-[90vh] flex items-center">
           <div className="container mx-auto px-4 w-full">
-            <div className={`relative overflow-hidden rounded-[2.5rem] md:rounded-[4rem] border shadow-2xl ${theme === 'dark' ? 'bg-[#0a0f1a] border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+            <div className={`relative overflow-hidden rounded-[2.5rem] md:rounded-[4rem] border shadow-2xl transition-all duration-500 ${theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
               <div className="grid grid-cols-1 lg:grid-cols-2 items-stretch">
-                <div className={`p-8 md:p-16 lg:p-24 flex flex-col justify-center space-y-8 md:space-y-10 relative z-10 ${theme === 'dark' ? 'text-white' : 'text-slate-900 lg:text-inherit'}`}>
+                <div className={`p-8 md:p-16 lg:p-24 flex flex-col justify-center space-y-8 md:space-y-10 relative z-10 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
                   <div className="space-y-4">
                     <div className="inline-flex items-center gap-2 px-4 py-2 bg-fuzzi-blue/20 text-fuzzi-blue text-[10px] font-black uppercase tracking-widest rounded-full border border-fuzzi-blue/20">
                       <FileText className="w-3.5 h-3.5"/> Catálogo Técnico
                     </div>
-                    <h2 className={`text-4xl md:text-6xl font-black leading-tight ${theme === 'dark' ? 'text-white' : 'lg:text-slate-900'}`}>
+                    <h2 className="text-4xl md:text-6xl font-black leading-tight">
                       {mainCatalog?.title || 'Catálogo de Esquadrias'}
                     </h2>
-                    <p className={`text-base md:text-xl font-medium leading-relaxed max-w-md ${theme === 'dark' ? 'text-slate-300 opacity-60' : 'text-black lg:text-slate-600 lg:opacity-60'}`}>
+                    <p className={`text-base md:text-xl font-medium leading-relaxed max-w-md opacity-70`}>
                       Confira as especificações técnicas, detalhes construtivos e opções de acabamentos exclusivos.
                     </p>
                   </div>
@@ -269,9 +279,10 @@ const App: React.FC = () => {
                     </a>
                   </div>
                 </div>
-                <div className="absolute lg:relative inset-0 lg:inset-auto w-full h-full lg:min-h-full z-0">
-                  <img src={mainCatalog?.coverImage || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1200'} className="absolute inset-0 w-full h-full object-cover" alt="Capa do Catálogo" />
-                  <div className={`absolute inset-0 bg-gradient-to-b ${theme === 'dark' ? 'from-black/100 via-black/85 to-black/100' : 'from-white/20 via-white/95 to-white/20'} lg:bg-none lg:bg-gradient-to-r ${theme === 'dark' ? 'lg:from-[#0a0f1a] lg:via-transparent lg:to-transparent' : 'lg:from-slate-50 lg:via-transparent lg:to-transparent'}`}></div>
+                <div className="absolute lg:relative inset-0 lg:inset-auto w-full h-full lg:min-h-full z-0 overflow-hidden">
+                  <img src={mainCatalog?.coverImage || DEFAULT_HERO_IMAGE} className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 hover:scale-110" alt="Capa do Catálogo" />
+                  <div className={`absolute inset-0 ${theme === 'dark' ? 'bg-gradient-to-r from-slate-900 via-slate-900/60 to-transparent' : 'bg-gradient-to-r from-slate-50 via-slate-50/60 to-transparent'} lg:block hidden`}></div>
+                  <div className={`absolute inset-0 ${theme === 'dark' ? 'bg-slate-900/80' : 'bg-slate-50/80'} lg:hidden block`}></div>
                 </div>
               </div>
             </div>
@@ -291,7 +302,7 @@ const App: React.FC = () => {
         <WhatsAppIcon className="w-8 h-8 md:w-10 md:h-10 text-white fill-current" />
       </a>
 
-      <Footer theme={theme} isAdmin={isAdminAuthenticated} onAdminToggle={()=>setIsAdminAuthenticated(false)} onLogin={onLoginSuccess} setView={setView} setIsLoginOpen={()=>{}} isLoginOpen={false} />
+      <Footer theme={theme} isAdmin={isAdminAuthenticated} onAdminToggle={onLogout} onLogin={onLoginSuccess} setView={setView} setIsLoginOpen={()=>{}} isLoginOpen={false} />
       {selectedProduct && <ProductDetail product={selectedProduct} theme={theme} onClose={()=>setSelectedProduct(null)} />}
       {isAdminProductOpen && <AdminModal theme={theme} onClose={()=>setIsAdminProductOpen(false)} onSave={handleSaveProduct} editProduct={currentProduct} isEditing={isEditing} />}
       {isAdminTestimonialOpen && <TestimonialModal theme={theme} onClose={()=>setIsAdminTestimonialOpen(false)} onSave={handleSaveTestimonial} editTestimonial={currentTestimonial} />}

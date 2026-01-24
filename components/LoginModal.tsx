@@ -16,7 +16,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ theme, onClose, onLogin }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === '123') {
+    if (password === '12') {
       onLogin(password);
       setError(false);
     } else {

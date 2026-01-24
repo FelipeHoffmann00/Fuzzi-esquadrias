@@ -4,19 +4,33 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Fuzzi Esquadrias</title>
+    <title>Fuzzi Esquadrias | Design e Qualidade Premium</title>
+    <meta name="description" content="Especialista em esquadrias de alumínio de alto padrão em Sumaré e região. Janelas integradas, portões e soluções sob medida." />
+    
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Fuzzi Esquadrias - Vitrine Premium" />
+    <meta property="og:description" content="Design sofisticado e engenharia de precisão em esquadrias de alumínio." />
+    <meta property="og:image" content="https://i.imgur.com/QZZKjXf.png" />
+    <meta property="twitter:card" content="summary_large_image" />
+
     <link rel="icon" type="image/png" href="https://i.imgur.com/QZZKjXf.png" />
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <script>
       window.tailwind.config = {
         theme: {
           extend: {
+            fontFamily: {
+              sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            },
             colors: {
               fuzzi: {
                 blue: '#00cfff',
+                dark: '#050a14',
                 gray: '#303030',
                 light: '#ffffff'
               }
@@ -27,12 +41,12 @@
     </script>
     <style>
       body {
-        font-family: 'Inter', sans-serif;
+        font-family: 'Plus Jakarta Sans', sans-serif;
         text-rendering: optimizeLegibility;
         -webkit-font-smoothing: antialiased;
       }
       .transition-theme {
-        transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1), color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
       }
       .fix-clipping {
         -webkit-mask-image: -webkit-radial-gradient(white, black);
@@ -41,24 +55,30 @@
         backface-visibility: hidden;
         transform: translateZ(0);
       }
-      img {
-        image-rendering: -webkit-optimize-contrast;
-      }
       ::-webkit-scrollbar {
-        width: 10px;
+        width: 8px;
       }
       ::-webkit-scrollbar-track {
         background: transparent;
       }
       ::-webkit-scrollbar-thumb {
-        background: #00cfff33;
+        background: #00cfff22;
         border-radius: 10px;
+        border: 2px solid transparent;
+        background-clip: content-box;
       }
       ::-webkit-scrollbar-thumb:hover {
-        background: #00cfff66;
+        background: #00cfff44;
+        background-clip: content-box;
       }
-      .custom-scrollbar::-webkit-scrollbar {
-        width: 4px;
+      
+      @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+      }
+      .float-animation {
+        animation: float 6s ease-in-out infinite;
       }
     </style>
   <script type="importmap">

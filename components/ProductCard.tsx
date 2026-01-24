@@ -16,89 +16,85 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, theme, onEdit, onDelete, onSelect, isAdmin, isDeleteDisabled }) => {
-  const productUrl = `${window.location.origin}${window.location.pathname}?id=${product.id}`;
   const whatsappLink = `https://wa.me/${WHATSAPP_NUMBER.replace(/\D/g, '')}?text=${encodeURIComponent(
-    `Olá! Tenho interesse no produto: ${product.name} (${productUrl}). Gostaria de solicitar um orçamento.`
+    `Olá! Tenho interesse no produto: ${product.name}. Gostaria de solicitar um orçamento.`
   )}`;
 
   return (
     <div 
-      className={`group flex flex-col h-full rounded-[1.2rem] md:rounded-[2rem] overflow-hidden border cursor-pointer transition-all duration-500 will-change-transform hover:-translate-y-2 fix-clipping ${
+      className={`group flex flex-col h-full rounded-[1.5rem] md:rounded-[2rem] overflow-hidden border cursor-pointer transition-all duration-500 will-change-transform hover:-translate-y-2 fix-clipping ${
         theme === 'dark' 
-          ? 'bg-slate-900 border-slate-800 hover:border-fuzzi-blue/50 shadow-2xl shadow-black/30' 
-          : 'bg-white border-slate-100 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.06)] hover:shadow-[0_40px_80px_-15px_rgba(0,0,0,0.1)]'
+          ? 'bg-slate-900/50 border-slate-800/60 hover:border-fuzzi-blue/30 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]' 
+          : 'bg-white border-slate-100 shadow-[0_15px_30px_-10px_rgba(0,0,0,0.05)] hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)]'
       }`}
       onClick={() => onSelect(product)}
     >
+      {/* Área da Imagem */}
       <div className="relative aspect-[4/3] overflow-hidden bg-slate-200 fix-clipping">
         <img 
           src={(product.images && product.images.length > 0) ? product.images[0] : DEFAULT_PRODUCT_IMAGE} 
           alt={product.name}
           className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110 will-change-transform"
+          loading="lazy"
           onError={(e) => {
             (e.target as HTMLImageElement).src = DEFAULT_PRODUCT_IMAGE;
           }}
         />
         
-        <div className="absolute inset-0 bg-black/40 lg:bg-black/60 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-          <div className="bg-white/90 backdrop-blur-sm text-fuzzi-gray px-3 py-1.5 md:px-4 md:py-2 rounded-full font-bold flex items-center gap-2 transform lg:translate-y-4 lg:group-hover:translate-y-0 transition-transform duration-300 shadow-lg scale-90 lg:scale-100">
-            <Maximize2 className="w-3 h-3 md:w-4 md:h-4 text-fuzzi-blue" /> <span className="text-[9px] md:text-sm">Ver Detalhes</span>
+        {/* Overlay Detalhes - Transparente com Blur */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-500">
+          <div className="bg-white/5 border border-white/20 backdrop-blur-md text-white px-3 py-1.5 md:px-5 md:py-2.5 rounded-full font-black flex items-center gap-1.5 md:gap-2 transform shadow-2xl scale-90 lg:scale-100 lg:translate-y-4 lg:group-hover:translate-y-0">
+            <Maximize2 className="w-3 h-3 md:w-4 md:h-4 text-fuzzi-blue" /> 
+            <span className="text-[9px] md:text-sm tracking-widest uppercase">Detalhes</span>
           </div>
         </div>
 
-        {/* Badge Destaque: Apenas Desktop */}
-        <div className="absolute top-2 left-2 md:top-4 md:left-4 hidden md:flex flex-col gap-2 z-10">
-          {product.featured && (
-            <span className="bg-amber-500 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1 w-fit">
-              <Star className="w-3 h-3 fill-current" /> Destaque
-            </span>
-          )}
-        </div>
-
+        {/* Botões Administrativos */}
         {isAdmin && (
-          <div className="absolute top-2 right-2 md:top-4 md:right-4 flex gap-1 md:gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300 z-10">
+          <div className="absolute top-3 right-3 flex gap-2 z-20">
             <button 
               onClick={(e) => { e.stopPropagation(); onEdit(product); }}
-              className="p-1 md:p-2 rounded-lg md:rounded-xl bg-white/90 text-fuzzi-blue hover:bg-fuzzi-blue hover:text-white transition-colors duration-200 shadow-md"
+              className="p-1.5 md:p-2.5 rounded-lg md:rounded-xl bg-white/20 border border-white/20 backdrop-blur-md text-white hover:bg-fuzzi-blue transition-all shadow-lg"
             >
-              <Edit3 className="w-3 md:w-4 md:h-4" />
+              <Edit3 className="w-3 h-3 md:w-4 md:h-4" />
             </button>
             <button 
               onClick={(e) => { 
                 e.stopPropagation(); 
                 if (isDeleteDisabled) {
-                  alert("Este é o único produto em destaque. A vitrine não pode ficar vazia.");
+                  alert("A vitrine não pode ficar vazia.");
                   return;
                 }
                 onDelete(product.id); 
               }}
-              className={`p-1 md:p-2 rounded-lg md:rounded-xl transition-colors duration-200 shadow-md ${
+              className={`p-1.5 md:p-2.5 rounded-lg md:rounded-xl border backdrop-blur-md transition-all shadow-lg ${
                 isDeleteDisabled 
-                  ? 'bg-slate-300/90 text-slate-500 cursor-not-allowed' 
-                  : 'bg-white/90 text-red-600 hover:bg-red-600 hover:text-white'
+                  ? 'bg-white/5 border-white/10 text-white/20 cursor-not-allowed' 
+                  : 'bg-white/20 border-white/20 text-white hover:bg-red-600 hover:border-red-600'
               }`}
-              title={isDeleteDisabled ? "Não é possível excluir o único destaque" : "Excluir Produto"}
               disabled={isDeleteDisabled}
             >
-              <Trash2 className="w-3 md:w-4 md:h-4" />
+              <Trash2 className="w-3 h-3 md:w-4 md:h-4" />
             </button>
           </div>
         )}
       </div>
 
-      <div className="p-3 md:p-6 flex flex-col flex-1">
-        <div className="flex items-center justify-between mb-0.5 md:mb-2">
-          <span className="text-[7px] md:text-[10px] font-black uppercase tracking-widest text-fuzzi-blue">{product.category}</span>
-          
-          {/* Indicador Destaque: Apenas Mobile */}
+      {/* Informações do Produto */}
+      <div className="pt-1.5 px-3 pb-3 md:p-8 flex flex-col flex-1">
+        {/* Categoria e Destaque lado a lado */}
+        <div className="flex flex-wrap items-center gap-1.5 md:gap-3 mb-1.5 md:mb-4">
+          <span className="text-[7px] md:text-[10px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] text-fuzzi-blue/80 bg-fuzzi-blue/10 px-1.5 py-0.5 rounded whitespace-nowrap">
+            {product.category}
+          </span>
           {product.featured && (
-            <div className="md:hidden flex items-center gap-1 text-[7px] font-black uppercase tracking-widest text-amber-500">
-              <Star className="w-2 h-2 fill-current" /> Destaque
-            </div>
+            <span className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 text-[7px] md:text-[9px] font-black uppercase tracking-[0.05em] md:tracking-[0.1em] border border-amber-500/20 whitespace-nowrap">
+              <Star className="w-2 h-2 md:w-2.5 md:h-2.5 fill-current" /> Destaque
+            </span>
           )}
         </div>
 
-        <h3 className={`text-sm md:text-xl font-black mb-2 md:mb-6 transition-colors duration-300 leading-tight group-hover:text-fuzzi-blue line-clamp-2 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+        <h3 className={`text-xs md:text-2xl font-black mb-2 md:mb-6 transition-colors duration-300 leading-tight group-hover:text-fuzzi-blue line-clamp-2 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
           {product.name}
         </h3>
         
@@ -108,10 +104,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, theme, onEdit, onDel
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="group/btn w-full flex items-center justify-center gap-1 py-2 md:py-4 bg-fuzzi-blue hover:bg-[#25D366] text-white font-black rounded-lg md:rounded-xl transition-[background-color,transform,shadow] duration-200 shadow-lg hover:shadow-[#25D366]/30 active:scale-95 text-[9px] md:text-sm uppercase tracking-normal md:tracking-wider whitespace-nowrap"
+            className="group/btn w-full flex items-center justify-center gap-1.5 md:gap-2 py-2.5 md:py-4 bg-fuzzi-blue text-white font-black rounded-lg md:rounded-2xl transition-all duration-300 shadow-xl shadow-fuzzi-blue/10 hover:bg-[#25D366] hover:shadow-[#25D366]/30 active:scale-95 text-[9px] md:text-xs uppercase tracking-[0.1em] md:tracking-[0.15em] whitespace-nowrap overflow-hidden"
           >
-            <WhatsAppIcon className="w-3 h-3 md:w-4 md:h-4 transition-colors text-white" fill="currentColor" />
-            Solicitar Orçamento
+            <WhatsAppIcon className="w-3.5 h-3.5 md:w-4 md:h-4 text-white fill-current shrink-0" />
+            <span className="hidden md:inline">Solicitar </span>
+            <span>Orçamento</span>
           </a>
         </div>
       </div>
