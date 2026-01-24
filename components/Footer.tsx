@@ -32,8 +32,9 @@ const Footer: React.FC<FooterProps> = ({ theme, isAdmin, onAdminToggle, onLogin,
 
   const scrollToSection = (id: string) => {
     setView('home');
+    const targetId = id === 'produtos' ? 'destaques' : id;
     setTimeout(() => {
-      const element = document.getElementById(id);
+      const element = document.getElementById(targetId);
       element?.scrollIntoView({ behavior: 'smooth' });
     }, 100);
   };
@@ -133,7 +134,7 @@ const Footer: React.FC<FooterProps> = ({ theme, isAdmin, onAdminToggle, onLogin,
               <div className="flex flex-col gap-3">
                 <button onClick={() => scrollToSection('inicio')} className="text-sm hover:text-fuzzi-blue transition-colors text-left">Início</button>
                 <button onClick={() => scrollToSection('diferenciais')} className="text-sm hover:text-fuzzi-blue transition-colors text-left">Diferenciais</button>
-                <button onClick={() => scrollToSection('produtos')} className="text-sm hover:text-fuzzi-blue transition-colors text-left">Produtos</button>
+                <button onClick={() => scrollToSection('produtos')} className="text-sm hover:text-fuzzi-blue transition-colors text-left">Destaques</button>
                 <button onClick={() => scrollToSection('catalogo')} className="text-sm hover:text-fuzzi-blue transition-colors text-left">Catálogo</button>
               </div>
 

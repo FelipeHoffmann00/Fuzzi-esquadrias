@@ -52,6 +52,13 @@ const Features: React.FC<FeaturesProps> = ({ theme }) => {
       {/* Cabeçalho alinhado com o max-w-7xl do grid */}
       <div className="max-w-7xl mx-auto mb-10 md:mb-16">
         <div className="text-left">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-fuzzi-blue/10 text-fuzzi-blue text-[10px] font-black uppercase tracking-[0.2em] mb-4 md:mb-6 border border-fuzzi-blue/5 shadow-sm">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-fuzzi-blue opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-fuzzi-blue"></span>
+            </span>
+            Diferenciais
+          </div>
           <h2 className={`text-4xl md:text-6xl font-black mb-3 leading-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
             Por que escolher a <br className="md:hidden" /> <span className="text-fuzzi-blue">Fuzzi?</span>
           </h2>

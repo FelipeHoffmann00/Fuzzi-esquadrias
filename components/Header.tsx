@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Home, PlusCircle, FileText, ChevronDown, ShoppingCart, MessageSquare, BookOpen, LayoutGrid, ShieldCheck, Award, Sun, Moon } from 'lucide-react';
+import { Home, PlusCircle, FileText, ChevronDown, ShoppingCart, MessageSquare, BookOpen, Star, ShieldCheck, Award, Sun, Moon } from 'lucide-react';
 import { Theme, View } from '../types';
 
 interface HeaderProps {
@@ -18,9 +18,8 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ theme, view, setView, toggleTheme, openAdminProduct, openAdminPDF, openAdminTestimonial, isAdmin, testimonialsCount }) => {
   const [isNewMenuOpen, setIsNewMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const LOGO_URL = "https://i.imgur.com/3AIeDRi.png";
   
-  const isTestimonialLimitReached = testimonialsCount >= 5;
+  const isTestimonialLimitReached = testimonialsCount >= 10;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -34,15 +33,16 @@ const Header: React.FC<HeaderProps> = ({ theme, view, setView, toggleTheme, open
 
   const scrollToSection = (id: string) => {
     const scrollOptions: ScrollIntoViewOptions = { behavior: 'smooth', block: 'start' };
-    
+    const targetId = id === 'produtos' ? 'destaques' : id;
+
     if (view !== 'home') {
       setView('home');
       setTimeout(() => {
-        const element = document.getElementById(id);
+        const element = document.getElementById(targetId);
         element?.scrollIntoView(scrollOptions);
       }, 100);
     } else {
-      const element = document.getElementById(id);
+      const element = document.getElementById(targetId);
       element?.scrollIntoView(scrollOptions);
     }
   };
@@ -50,7 +50,7 @@ const Header: React.FC<HeaderProps> = ({ theme, view, setView, toggleTheme, open
   const navItems = [
     { id: 'inicio', label: 'Início', icon: Home },
     { id: 'diferenciais', label: 'Diferenciais', icon: ShieldCheck },
-    { id: 'produtos', label: 'Produtos', icon: LayoutGrid },
+    { id: 'produtos', label: 'Destaques', icon: Star },
     { id: 'depoimentos', label: 'Depoimentos', icon: Award },
     { id: 'catalogo', label: 'Catálogo', icon: BookOpen },
   ];
@@ -58,9 +58,19 @@ const Header: React.FC<HeaderProps> = ({ theme, view, setView, toggleTheme, open
   return (
     <header className={`fixed top-0 left-0 right-0 z-[100] w-full backdrop-blur-md transition-all duration-300 border-b ${theme === 'dark' ? 'bg-slate-950/80 border-slate-800' : 'bg-white/80 border-fuzzi-blue/10'}`}>
       <div className="container mx-auto px-4 h-20 md:h-24 relative flex items-center justify-between">
-        <div className="flex items-center cursor-pointer group h-10 md:h-16 z-20" onClick={() => { setView('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
-          <img src={LOGO_URL} alt="Fuzzi Esquadrias" className="h-full w-auto object-contain transition-transform duration-300 group-hover:scale-105" />
+        
+        {/* LOGOTIPO OFICIAL FUZZI - USANDO SOMENTE A IMAGEM FORNECIDA */}
+        <div 
+          className="flex items-center cursor-pointer group z-20 shrink-0" 
+          onClick={() => { setView('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+        >
+          <img 
+            src="https://i.imgur.com/QZZKjXf.png" 
+            alt="Fuzzi Esquadrias" 
+            className="h-14 md:h-18 lg:h-20 w-auto object-contain transition-transform duration-500 group-hover:scale-105"
+          />
         </div>
+        
         <nav className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-end gap-2">
           {navItems.map((item) => (
             <button key={item.id} onClick={() => scrollToSection(item.id)} className="relative flex flex-col items-center group transition-all duration-500 active:scale-95 px-4 py-2">
@@ -84,6 +94,7 @@ const Header: React.FC<HeaderProps> = ({ theme, view, setView, toggleTheme, open
              </div>
           </div>
         </nav>
+        
         <div className="flex items-center space-x-3 md:space-x-4 z-20">
           <div className={`relative transition-all duration-500 ease-in-out ${isAdmin ? 'w-auto opacity-100 translate-x-0 mr-1 md:mr-4 scale-100' : 'w-0 opacity-0 translate-x-8 mr-0 scale-90 pointer-events-none'}`} ref={menuRef}>
             <button onClick={() => setIsNewMenuOpen(!isNewMenuOpen)} className="flex items-center gap-2 md:gap-3 px-3 py-2 md:px-6 md:py-3.5 rounded-xl md:rounded-2xl text-xs font-black bg-green-600 text-white hover:bg-green-700 transition-all shadow-xl active:scale-95 whitespace-nowrap">
@@ -96,15 +107,23 @@ const Header: React.FC<HeaderProps> = ({ theme, view, setView, toggleTheme, open
                 <div className="p-3 space-y-1.5">
                   <button onClick={() => { openAdminProduct(); setIsNewMenuOpen(false); }} className={`w-full flex items-center gap-4 px-5 py-4 text-sm font-bold text-left rounded-2xl transition-all hover:bg-fuzzi-blue hover:text-white ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}><ShoppingCart className="w-5 h-5 opacity-70" /> Novo Destaque</button>
                   <button onClick={() => { openAdminPDF(); setIsNewMenuOpen(false); }} className={`w-full flex items-center gap-4 px-5 py-4 text-sm font-bold text-left rounded-2xl transition-all hover:bg-fuzzi-blue hover:text-white ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}><FileText className="w-5 h-5 opacity-70" /> Editar Catálogo</button>
-                  <button onClick={() => { if (!isTestimonialLimitReached) { openAdminTestimonial(); setIsNewMenuOpen(false); } else { alert("Limite de 5 depoimentos atingido."); } }} className={`w-full flex items-center gap-4 px-5 py-4 text-sm font-bold text-left rounded-2xl transition-all ${isTestimonialLimitReached ? 'opacity-50 cursor-not-allowed bg-slate-100 dark:bg-slate-800 text-slate-400' : `hover:bg-fuzzi-blue hover:text-white ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}`}><MessageSquare className="w-5 h-5 opacity-70" /> {isTestimonialLimitReached ? 'Limite Atingido' : 'Novo Depoimento'}</button>
+                  <button onClick={() => { if (!isTestimonialLimitReached) { openAdminTestimonial(); setIsNewMenuOpen(false); } else { alert("Limite de 10 depoimentos atingido."); } }} className={`w-full flex items-center gap-4 px-5 py-4 text-sm font-bold text-left rounded-2xl transition-all ${isTestimonialLimitReached ? 'opacity-50 cursor-not-allowed bg-slate-100 dark:bg-slate-800 text-slate-400' : `hover:bg-fuzzi-blue hover:text-white ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}`}><MessageSquare className="w-5 h-5 opacity-70" /> {isTestimonialLimitReached ? 'Limite Atingido' : 'Novo Depoimento'}</button>
                 </div>
               </div>
             )}
           </div>
-          <button onClick={toggleTheme} className={`relative flex items-center w-[60px] h-[32px] md:w-[72px] md:h-[38px] p-1 rounded-full border transition-all duration-500 ${theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-slate-100 border-slate-200'}`}>
+          
+          <button 
+            onClick={toggleTheme} 
+            className={`relative flex items-center w-[60px] h-[32px] md:w-[72px] md:h-[38px] p-1 rounded-full border transition-all duration-500 ${theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-slate-100 border-slate-200'}`}
+          >
             <div className={`absolute top-1 bottom-1 w-[24px] md:w-[30px] rounded-full transition-all duration-500 ${theme === 'dark' ? 'translate-x-[26px] md:translate-x-[33px] bg-slate-800' : 'translate-x-0 bg-white'}`} />
-            <div className="relative z-10 flex-1 flex justify-center items-center"><Sun className={`w-3.5 h-3.5 md:w-4 md:h-4 ${theme === 'light' ? 'text-amber-500' : 'text-slate-400 opacity-40'}`} /></div>
-            <div className="relative z-10 flex-1 flex justify-center items-center"><Moon className={`w-3.5 h-3.5 md:w-4 md:h-4 ${theme === 'dark' ? 'text-fuzzi-blue' : 'text-slate-400 opacity-40'}`} /></div>
+            <div className="relative z-10 flex-1 flex justify-center items-center">
+              <Sun className={`w-3.5 h-3.5 md:w-4 md:h-4 ${theme === 'light' ? 'text-amber-500' : 'text-slate-400 opacity-40'}`} />
+            </div>
+            <div className="relative z-10 flex-1 flex justify-center items-center">
+              <Moon className={`w-3.5 h-3.5 md:w-4 md:h-4 ${theme === 'dark' ? 'text-fuzzi-blue' : 'text-slate-400 opacity-40'}`} />
+            </div>
           </button>
         </div>
       </div>

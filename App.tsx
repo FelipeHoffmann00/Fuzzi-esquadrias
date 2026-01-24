@@ -27,7 +27,6 @@ const App: React.FC = () => {
   const [pdfCatalogs, setPdfCatalogs] = useState<CatalogPDF[]>([]);
   const [heroImage, setHeroImage] = useState<string>(DEFAULT_HERO_IMAGE);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<string>('Todas');
   
   const [isAdminProductOpen, setIsAdminProductOpen] = useState(false);
   const [isAdminTestimonialOpen, setIsAdminTestimonialOpen] = useState(false);
@@ -183,11 +182,6 @@ const App: React.FC = () => {
   const mainCatalog = pdfCatalogs[0] || INITIAL_PDF_CATALOGS[0];
   const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER.replace(/\D/g, '')}?text=${encodeURIComponent("Olá! Gostaria de falar com um vendedor sobre os produtos da Fuzzi.")}`;
 
-  const filteredProducts = useMemo(() => {
-    if (selectedCategory === 'Todas') return products;
-    return products.filter(p => p.category === selectedCategory);
-  }, [products, selectedCategory]);
-
   return (
     <div className={`min-h-screen transition-theme flex flex-col overflow-x-hidden ${theme === 'dark' ? 'bg-slate-950 text-white' : 'bg-white text-slate-900'}`}>
       <Header 
@@ -199,19 +193,8 @@ const App: React.FC = () => {
       />
 
       {isLoading && (
-        <div className="fixed inset-0 z-[200] bg-black/40 backdrop-blur-md flex items-center justify-center">
-          <div className="bg-white dark:bg-slate-900 p-10 rounded-[3rem] shadow-2xl flex flex-col items-center gap-6 animate-in zoom-in-95">
-            <div className="relative">
-              <Loader2 className="w-16 h-16 text-fuzzi-blue animate-spin" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-2 h-2 bg-fuzzi-blue rounded-full animate-ping"></div>
-              </div>
-            </div>
-            <div className="text-center">
-              <span className="font-black text-[10px] uppercase tracking-[0.3em] text-fuzzi-blue block">Nuvem Fuzzi</span>
-              <span className="text-sm font-bold opacity-60">Sincronizando dados...</span>
-            </div>
-          </div>
+        <div className="fixed inset-0 z-[200] bg-black/20 backdrop-blur-sm flex items-center justify-center">
+          <Loader2 className="w-12 h-12 text-fuzzi-blue animate-spin" />
         </div>
       )}
 
@@ -222,31 +205,33 @@ const App: React.FC = () => {
 
         <section id="diferenciais" className="py-12 md:py-20 scroll-mt-20 md:scroll-mt-28"><Features theme={theme} /></section>
         
-        <section id="produtos" className="container mx-auto px-4 py-10 md:py-20 scroll-mt-20 md:scroll-mt-28">
-          <div className="max-w-7xl mx-auto mb-12">
+        <section id="destaques" className="container mx-auto px-4 py-10 md:py-20 scroll-mt-20 md:scroll-mt-28">
+          <div className="max-w-7xl mx-auto mb-10">
             <div className="text-left">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-fuzzi-blue/10 text-fuzzi-blue text-[10px] font-black uppercase tracking-[0.2em] mb-6 md:mb-10 border border-fuzzi-blue/5 shadow-sm">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-fuzzi-blue/10 text-fuzzi-blue text-[10px] font-black uppercase tracking-[0.2em] mb-4 md:mb-6 border border-fuzzi-blue/5 shadow-sm">
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-fuzzi-blue opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-fuzzi-blue"></span>
                 </span>
-                Nossa Vitrine
+                Nossos Destaques
               </div>
-              <h2 className="text-5xl md:text-6xl font-black leading-tight">Projetos de <span className="text-fuzzi-blue">Alto Padrão</span></h2>
-              <p className="mt-4 text-lg opacity-60 font-medium max-w-2xl">
-                Explore nosso catálogo e encontre a solução perfeita para transformar seu projeto arquitetônico.
+              <h2 className="text-4xl md:text-6xl font-black leading-tight">Projetos em <span className="text-fuzzi-blue">Destaque</span></h2>
+              <p className="mt-3 text-base md:text-lg opacity-60 font-medium max-w-2xl">
+                Explore nossa seleção de projetos que demonstram o auge da sofisticação e engenharia Fuzzi.
               </p>
             </div>
           </div>
           
-          <ProductGrid 
-            products={products} 
-            theme={theme} 
-            isAdmin={isAdminAuthenticated} 
-            onEdit={(p) => { setCurrentProduct(p); setIsEditing(true); setIsAdminProductOpen(true); }} 
-            onDelete={(id) => setConfirmDelete({isOpen:true, type:'product', id})} 
-            onSelect={setSelectedProduct} 
-          />
+          <div className="max-w-7xl mx-auto">
+            <ProductGrid 
+              products={products} 
+              theme={theme} 
+              isAdmin={isAdminAuthenticated} 
+              onEdit={(p) => { setCurrentProduct(p); setIsEditing(true); setIsAdminProductOpen(true); }} 
+              onDelete={(id) => setConfirmDelete({isOpen:true, type:'product', id})} 
+              onSelect={setSelectedProduct} 
+            />
+          </div>
         </section>
 
         <section id="depoimentos" className="py-10 scroll-mt-20 md:scroll-mt-28 min-h-[90vh] flex items-center">
@@ -259,32 +244,32 @@ const App: React.FC = () => {
           <div className="container mx-auto px-4 w-full">
             <div className={`relative overflow-hidden rounded-[2.5rem] md:rounded-[4rem] border shadow-2xl ${theme === 'dark' ? 'bg-[#0a0f1a] border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
               <div className="grid grid-cols-1 lg:grid-cols-2 items-stretch">
-                <div className="p-8 md:p-16 lg:p-24 flex flex-col justify-center space-y-8 md:space-y-10 relative z-10 text-white lg:text-inherit">
+                <div className={`p-8 md:p-16 lg:p-24 flex flex-col justify-center space-y-8 md:space-y-10 relative z-10 ${theme === 'dark' ? 'text-white' : 'text-slate-900 lg:text-inherit'}`}>
                   <div className="space-y-4">
                     <div className="inline-flex items-center gap-2 px-4 py-2 bg-fuzzi-blue/20 text-fuzzi-blue text-[10px] font-black uppercase tracking-widest rounded-full border border-fuzzi-blue/20">
                       <FileText className="w-3.5 h-3.5"/> Catálogo Técnico
                     </div>
-                    <h2 className={`text-4xl md:text-6xl font-black leading-tight ${theme === 'dark' ? 'text-white' : 'lg:text-slate-900 text-white'}`}>
+                    <h2 className={`text-4xl md:text-6xl font-black leading-tight ${theme === 'dark' ? 'text-white' : 'lg:text-slate-900'}`}>
                       {mainCatalog?.title || 'Catálogo de Esquadrias'}
                     </h2>
-                    <p className={`text-lg md:text-xl font-medium leading-relaxed max-w-md text-white opacity-100 ${theme === 'dark' ? 'lg:text-slate-300 lg:opacity-60' : 'lg:text-slate-600 lg:opacity-60'}`}>
+                    <p className={`text-base md:text-xl font-medium leading-relaxed max-w-md ${theme === 'dark' ? 'text-slate-300 opacity-60' : 'text-black lg:text-slate-600 lg:opacity-60'}`}>
                       Confira as especificações técnicas, detalhes construtivos e opções de acabamentos exclusivos.
                     </p>
                   </div>
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <a href={mainCatalog?.pdfUrl} target="_blank" className="group flex items-center justify-center gap-3 px-8 py-5 bg-fuzzi-blue text-white font-black rounded-2xl shadow-xl shadow-fuzzi-blue/20 hover:scale-105 transition-all active:scale-95 text-sm uppercase tracking-wider">
+                  <div className="flex flex-col sm:flex-row gap-4 items-start">
+                    <a href={mainCatalog?.pdfUrl} target="_blank" className="group w-full sm:w-fit flex items-center justify-center gap-3 px-8 py-4 bg-fuzzi-blue text-white font-black rounded-2xl shadow-xl shadow-fuzzi-blue/20 hover:scale-105 transition-all active:scale-95 text-xs md:text-sm uppercase tracking-wider whitespace-nowrap">
                       Veja nosso catálogo
-                      <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                      <ArrowRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
                     </a>
-                    <a href={whatsappUrl} target="_blank" className="flex items-center justify-center gap-3 px-8 py-5 bg-[#25D366] text-white font-black rounded-2xl shadow-xl shadow-[#25D366]/20 hover:scale-105 transition-all active:scale-95 text-sm uppercase tracking-wider">
-                      <WhatsAppIcon className="w-5 h-5 fill-white" />
+                    <a href={whatsappUrl} target="_blank" className="flex w-full sm:w-fit items-center justify-center gap-3 px-8 py-4 bg-[#25D366] text-white font-black rounded-2xl shadow-xl shadow-[#25D366]/20 hover:scale-105 transition-all active:scale-95 text-xs md:text-sm uppercase tracking-wider whitespace-nowrap">
+                      <WhatsAppIcon className="w-4 h-4 md:w-5 md:h-5 fill-white" />
                       Fale com um vendedor
                     </a>
                   </div>
                 </div>
                 <div className="absolute lg:relative inset-0 lg:inset-auto w-full h-full lg:min-h-full z-0">
                   <img src={mainCatalog?.coverImage || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1200'} className="absolute inset-0 w-full h-full object-cover" alt="Capa do Catálogo" />
-                  <div className={`absolute inset-0 bg-gradient-to-b from-black/100 via-black/85 to-black/100 lg:bg-none lg:bg-gradient-to-r ${theme === 'dark' ? 'lg:from-[#0a0f1a] lg:via-transparent lg:to-transparent' : 'lg:from-slate-50 lg:via-transparent lg:to-transparent'}`}></div>
+                  <div className={`absolute inset-0 bg-gradient-to-b ${theme === 'dark' ? 'from-black/100 via-black/85 to-black/100' : 'from-white/20 via-white/95 to-white/20'} lg:bg-none lg:bg-gradient-to-r ${theme === 'dark' ? 'lg:from-[#0a0f1a] lg:via-transparent lg:to-transparent' : 'lg:from-slate-50 lg:via-transparent lg:to-transparent'}`}></div>
                 </div>
               </div>
             </div>

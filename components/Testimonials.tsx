@@ -96,9 +96,9 @@ const Testimonials: React.FC<TestimonialsProps> = ({ theme, testimonials, isAdmi
   if (testimonials.length === 0) return null;
 
   return (
-    <section className="py-1 md:py-4 relative overflow-hidden select-none">
-      <div className="container mx-auto px-4">
-        {/* Cabeçalho alinhado com max-w-7xl */}
+    <section className="py-12 md:py-20 relative z-20 select-none overflow-visible">
+      <div className="container mx-auto px-4 overflow-visible">
+        {/* Cabeçalho alinhado */}
         <div className="max-w-7xl mx-auto mb-8 md:mb-12">
           <div className="text-left">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-fuzzi-blue/10 text-fuzzi-blue text-[10px] font-black uppercase tracking-[0.2em] mb-6 md:mb-10 border border-fuzzi-blue/5 shadow-sm">
@@ -118,12 +118,12 @@ const Testimonials: React.FC<TestimonialsProps> = ({ theme, testimonials, isAdmi
         </div>
 
         <div 
-          className="relative max-w-5xl mx-auto h-[350px] md:h-[420px] flex items-center justify-center cursor-grab active:cursor-grabbing touch-pan-y"
+          className="relative max-w-5xl mx-auto h-[400px] md:h-[500px] flex items-center justify-center cursor-grab active:cursor-grabbing touch-pan-y overflow-visible mb-2 md:mb-4"
           onTouchStart={(e) => { setTouchEnd(null); setTouchStart(e.targetTouches[0].clientX); }}
           onTouchMove={(e) => setTouchEnd(e.targetTouches[0].clientX)}
           onTouchEnd={() => { handleSwipeCheck(); startTimers(); }}
         >
-          <div className="relative w-full h-full flex items-center justify-center perspective-1000">
+          <div className="relative w-full h-full flex items-center justify-center perspective-1000 overflow-visible">
             {testimonials.map((testimonial, index) => {
               const total = testimonials.length;
               let position = "hidden";
@@ -138,17 +138,17 @@ const Testimonials: React.FC<TestimonialsProps> = ({ theme, testimonials, isAdmi
                   onClick={() => position !== "active" && goToSlide(index)}
                   className={`absolute w-full max-w-[290px] md:max-w-md transition-all duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-[2rem] md:rounded-[2.5rem] overflow-hidden border ${
                     position === "active" 
-                      ? "z-50 opacity-100 translate-x-0 scale-100 shadow-[0_40px_80px_-15px_rgba(0,0,0,0.3)] blur-0" 
+                      ? "z-50 opacity-100 translate-x-0 scale-100 shadow-[0_40px_80px_-15px_rgba(0,0,0,0.3)] blur-0 ring-4 ring-fuzzi-blue/5" 
                       : position === "prev"
                         ? "z-20 opacity-30 -translate-x-[50%] md:-translate-x-[60%] scale-[0.8] blur-sm grayscale pointer-events-none"
                         : position === "next"
                           ? "z-20 opacity-30 translate-x-[50%] md:translate-x-[60%] scale-[0.8] blur-sm grayscale pointer-events-none"
                           : "z-10 opacity-0 scale-50 translate-x-0 pointer-events-none blur-xl"
                   } ${
-                    theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100 shadow-xl'
+                    theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100'
                   }`}
                 >
-                  <div className="flex flex-col h-full">
+                  <div className="flex flex-col h-full overflow-hidden">
                     <div className="relative h-36 md:h-52 overflow-hidden">
                       <img 
                         src={testimonial.image || DEFAULT_TESTIMONIAL_IMAGE} 
@@ -207,7 +207,7 @@ const Testimonials: React.FC<TestimonialsProps> = ({ theme, testimonials, isAdmi
           <button onClick={onNextClick} className="hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 z-40 p-4 rounded-full bg-slate-900/50 text-white backdrop-blur-md hover:bg-fuzzi-blue transition-all -mr-12"><ChevronRight className="w-8 h-8" /></button>
         </div>
 
-        <div className="mt-0 max-w-xs mx-auto space-y-2">
+        <div className="mt-2 md:mt-4 max-w-xs mx-auto space-y-2">
           <div className={`h-1 w-full rounded-full overflow-hidden ${theme === 'dark' ? 'bg-slate-800' : 'bg-slate-100'}`}>
             <div className="h-full bg-fuzzi-blue transition-all duration-300 ease-linear" style={{ width: `${progress}%` }}></div>
           </div>
