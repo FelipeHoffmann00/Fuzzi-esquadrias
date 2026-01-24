@@ -89,8 +89,7 @@ const Hero: React.FC<HeroProps> = ({ theme, setView, heroImage, isAdmin, onHeroI
 
   return (
     <div className="w-full pt-6 pb-12 md:py-24 flex flex-col lg:flex-row items-center gap-10 lg:gap-20">
-      {/* Container de Texto: Alinhado à esquerda no Mobile e Desktop */}
-      <div className="flex-1 text-left animate-in fade-in slide-in-from-left-4 duration-1000 relative z-20 px-6 md:px-0">
+      <div className="flex-1 text-left animate-in fade-in slide-in-from-left-8 duration-1000 relative z-20 px-6 md:px-0">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-fuzzi-blue/10 text-fuzzi-blue text-[10px] font-black uppercase tracking-[0.2em] mb-6 md:mb-10 border border-fuzzi-blue/5 shadow-sm">
           <span className="relative flex h-1.5 w-1.5">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-fuzzi-blue opacity-75"></span>
@@ -108,23 +107,22 @@ const Hero: React.FC<HeroProps> = ({ theme, setView, heroImage, isAdmin, onHeroI
         </p>
       </div>
 
-      {/* Container de Imagem */}
       <div className="flex-[1.2] w-full relative group mx-auto px-4 md:px-0 z-10">
-        <div className={`relative overflow-hidden rounded-[2.5rem] md:rounded-[3.5rem] transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+        <div className={`relative overflow-hidden rounded-[2.5rem] md:rounded-[3.5rem] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] ${
           theme === 'dark' 
-            ? 'shadow-[0_30px_60px_-15px_rgba(0,0,0,0.6)]' 
-            : 'shadow-[0_30px_50px_-15px_rgba(0,0,0,0.1)]'
-        } md:hover:scale-[1.02] md:hover:shadow-[0_0_80px_-10px_rgba(0,207,255,0.2)]`}>
+            ? 'shadow-[0_40px_100px_-20px_rgba(0,0,0,0.8)] border border-white/5' 
+            : 'shadow-[0_40px_100px_-20px_rgba(0,0,0,0.15)] border border-slate-100'
+        } md:hover:scale-[1.01] overflow-hidden`}>
           
           <img 
             key={heroImage.substring(0, 100)} 
             src={heroImage} 
-            className="w-full aspect-[1.3/1] md:aspect-[1.5/1] object-cover transition-transform duration-1000 md:group-hover:scale-105"
+            className="w-full aspect-[1.3/1] md:aspect-[1.5/1] object-cover transition-transform duration-1000 ease-out md:group-hover:scale-110"
             alt="Fuzzi Esquadrias de Alumínio"
           />
 
-          <div className={`absolute inset-0 bg-gradient-to-t pointer-events-none transition-opacity duration-500 ${
-            theme === 'dark' ? 'from-slate-950/40 to-transparent' : 'from-black/5 to-transparent'
+          <div className={`absolute inset-0 bg-gradient-to-t pointer-events-none transition-opacity duration-700 opacity-0 group-hover:opacity-100 ${
+            theme === 'dark' ? 'from-slate-950/60 to-transparent' : 'from-black/10 to-transparent'
           }`}></div>
           
           {isAdmin && (
@@ -136,6 +134,10 @@ const Hero: React.FC<HeroProps> = ({ theme, setView, heroImage, isAdmin, onHeroI
             </div>
           )}
         </div>
+        
+        {/* Elemento Decorativo Refinado */}
+        <div className={`absolute -bottom-6 -right-6 w-32 h-32 rounded-full blur-[80px] opacity-20 bg-fuzzi-blue pointer-events-none z-0`}></div>
+        <div className={`absolute -top-6 -left-6 w-32 h-32 rounded-full blur-[80px] opacity-10 bg-fuzzi-blue pointer-events-none z-0`}></div>
       </div>
 
       {isCropping && tempImage && (

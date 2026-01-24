@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Product, Testimonial, Theme, View, CatalogPDF } from './types';
 import { INITIAL_PRODUCTS, INITIAL_TESTIMONIALS, INITIAL_PDF_CATALOGS, WHATSAPP_NUMBER } from './constants';
 import { supabase, uploadImage } from './supabase';
@@ -12,7 +12,7 @@ import Footer from './components/Footer';
 import Testimonials from './components/Testimonials';
 import Features from './components/Features';
 import ProductDetail from './components/ProductDetail'; 
-import ProductCard from './components/ProductCard'; 
+import ProductGrid from './components/ProductGrid'; 
 import ConfirmModal from './components/ConfirmModal'; 
 import WhatsAppIcon from './components/WhatsAppIcon';
 import { FileText, Loader2, ArrowRight } from 'lucide-react';
@@ -27,6 +27,7 @@ const App: React.FC = () => {
   const [pdfCatalogs, setPdfCatalogs] = useState<CatalogPDF[]>([]);
   const [heroImage, setHeroImage] = useState<string>(DEFAULT_HERO_IMAGE);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState<string>('Todas');
   
   const [isAdminProductOpen, setIsAdminProductOpen] = useState(false);
   const [isAdminTestimonialOpen, setIsAdminTestimonialOpen] = useState(false);
@@ -182,6 +183,11 @@ const App: React.FC = () => {
   const mainCatalog = pdfCatalogs[0] || INITIAL_PDF_CATALOGS[0];
   const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER.replace(/\D/g, '')}?text=${encodeURIComponent("Olá! Gostaria de falar com um vendedor sobre os produtos da Fuzzi.")}`;
 
+  const filteredProducts = useMemo(() => {
+    if (selectedCategory === 'Todas') return products;
+    return products.filter(p => p.category === selectedCategory);
+  }, [products, selectedCategory]);
+
   return (
     <div className={`min-h-screen transition-theme flex flex-col overflow-x-hidden ${theme === 'dark' ? 'bg-slate-950 text-white' : 'bg-white text-slate-900'}`}>
       <Header 
@@ -217,7 +223,6 @@ const App: React.FC = () => {
         <section id="diferenciais" className="py-12 md:py-20 scroll-mt-20 md:scroll-mt-28"><Features theme={theme} /></section>
         
         <section id="produtos" className="container mx-auto px-4 py-10 md:py-20 scroll-mt-20 md:scroll-mt-28">
-          {/* Header alinhado com max-w-7xl */}
           <div className="max-w-7xl mx-auto mb-12">
             <div className="text-left">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-fuzzi-blue/10 text-fuzzi-blue text-[10px] font-black uppercase tracking-[0.2em] mb-6 md:mb-10 border border-fuzzi-blue/5 shadow-sm">
@@ -228,14 +233,20 @@ const App: React.FC = () => {
                 Nossa Vitrine
               </div>
               <h2 className="text-5xl md:text-6xl font-black leading-tight">Projetos de <span className="text-fuzzi-blue">Alto Padrão</span></h2>
+              <p className="mt-4 text-lg opacity-60 font-medium max-w-2xl">
+                Explore nosso catálogo e encontre a solução perfeita para transformar seu projeto arquitetônico.
+              </p>
             </div>
           </div>
           
-          <div className="max-w-7xl mx-auto grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
-            {products.map(p => (
-              <ProductCard key={p.id} product={p} theme={theme} isAdmin={isAdminAuthenticated} onEdit={() => { setCurrentProduct(p); setIsEditing(true); setIsAdminProductOpen(true); }} onDelete={(id) => setConfirmDelete({isOpen:true, type:'product', id})} onSelect={setSelectedProduct} />
-            ))}
-          </div>
+          <ProductGrid 
+            products={products} 
+            theme={theme} 
+            isAdmin={isAdminAuthenticated} 
+            onEdit={(p) => { setCurrentProduct(p); setIsEditing(true); setIsAdminProductOpen(true); }} 
+            onDelete={(id) => setConfirmDelete({isOpen:true, type:'product', id})} 
+            onSelect={setSelectedProduct} 
+          />
         </section>
 
         <section id="depoimentos" className="py-10 scroll-mt-20 md:scroll-mt-28 min-h-[90vh] flex items-center">
@@ -280,6 +291,19 @@ const App: React.FC = () => {
           </div>
         </section>
       </main>
+
+      {/* Floating WhatsApp CTA */}
+      <a 
+        href={whatsappUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 md:bottom-10 md:right-10 z-[105] group flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-[#25D366] rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300"
+        title="Fale Conosco no WhatsApp"
+      >
+        <span className="absolute inset-0 rounded-full bg-[#25D366] animate-ping opacity-20"></span>
+        <WhatsAppIcon className="w-8 h-8 md:w-10 md:h-10 text-white fill-current" />
+      </a>
+
       <Footer theme={theme} isAdmin={isAdminAuthenticated} onAdminToggle={()=>setIsAdminAuthenticated(false)} onLogin={onLoginSuccess} setView={setView} setIsLoginOpen={()=>{}} isLoginOpen={false} />
       {selectedProduct && <ProductDetail product={selectedProduct} theme={theme} onClose={()=>setSelectedProduct(null)} />}
       {isAdminProductOpen && <AdminModal theme={theme} onClose={()=>setIsAdminProductOpen(false)} onSave={handleSaveProduct} editProduct={currentProduct} isEditing={isEditing} />}
