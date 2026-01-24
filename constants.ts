@@ -14,7 +14,6 @@ export const INITIAL_PRODUCTS: Product[] = [
       'https://images.unsplash.com/photo-1600607686527-6fb886090705?auto=format&fit=crop&q=80&w=800',
       'https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?auto=format&fit=crop&q=80&w=800'
     ],
-    category: 'Janelas',
     featured: true
   },
   {
@@ -26,7 +25,6 @@ export const INITIAL_PRODUCTS: Product[] = [
       'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&q=80&w=800',
       'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=800'
     ],
-    category: 'Portas',
     featured: true
   },
   {
@@ -38,7 +36,6 @@ export const INITIAL_PRODUCTS: Product[] = [
       'https://images.unsplash.com/photo-1595846519845-68e298c2edd8?auto=format&fit=crop&q=80&w=800',
       'https://images.unsplash.com/photo-1623940228318-77c85856c666?auto=format&fit=crop&q=80&w=800'
     ],
-    category: 'Portões',
     featured: true
   }
 ];
@@ -48,8 +45,7 @@ export const INITIAL_PDF_CATALOGS: CatalogPDF[] = [
     id: 'pdf_1',
     title: 'Catálogo de Esquadrias',
     coverImage: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=800',
-    pdfUrl: '#',
-    category: 'Principal'
+    pdfUrl: '#'
   }
 ];
 

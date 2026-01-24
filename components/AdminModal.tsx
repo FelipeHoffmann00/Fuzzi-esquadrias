@@ -17,7 +17,6 @@ const MAX_DIMENSION = 800;
 const AdminModal: React.FC<AdminModalProps> = ({ theme, onClose, onSave, editProduct, isEditing }) => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('');
   const [images, setImages] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -29,23 +28,16 @@ const AdminModal: React.FC<AdminModalProps> = ({ theme, onClose, onSave, editPro
     if (editProduct && isEditing) {
       setName(editProduct.name);
       setDescription(editProduct.description);
-      setCategory(editProduct.category);
       setImages(editProduct.images || []);
-    } else {
-      setCategory('Janelas');
     }
   }, [editProduct, isEditing]);
 
   const requestCameraPermission = async () => {
     try {
-      // Força o navegador a exibir o prompt de permissão
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      // Fecha o stream imediatamente após conseguir a permissão, pois queremos apenas o input nativo
       stream.getTracks().forEach(track => track.stop());
       cameraInputRef.current?.click();
     } catch (err) {
-      console.warn("Permissão de câmera não concedida ou dispositivo não encontrado:", err);
-      // Tenta abrir o input mesmo assim, o SO cuidará do feedback se estiver bloqueado
       cameraInputRef.current?.click();
     }
   };
@@ -130,7 +122,7 @@ const AdminModal: React.FC<AdminModalProps> = ({ theme, onClose, onSave, editPro
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !description.trim() || !category.trim() || images.length === 0) {
+    if (!name.trim() || !description.trim() || images.length === 0) {
       setError('Preencha todos os campos obrigatórios.');
       return;
     }
@@ -139,7 +131,6 @@ const AdminModal: React.FC<AdminModalProps> = ({ theme, onClose, onSave, editPro
       id: isEditing && editProduct ? editProduct.id : `prod_${Date.now()}`,
       name: name.trim(),
       description: description.trim(),
-      category: category.trim(),
       images: images,
       featured: true
     };
@@ -159,16 +150,12 @@ const AdminModal: React.FC<AdminModalProps> = ({ theme, onClose, onSave, editPro
 
         <form onSubmit={handleSubmit} className="p-8 space-y-6">
           {error && <div className="p-4 bg-red-50 text-red-600 rounded-xl text-xs font-bold">{error}</div>}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-1">
-              <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Título do Produto</label>
-              <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex: Janela Integrada" className={`w-full px-5 py-4 rounded-2xl border outline-none ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-200'}`} />
-            </div>
-            <div className="space-y-1">
-              <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Categoria</label>
-              <input type="text" value={category} onChange={(e) => setCategory(e.target.value)} placeholder="Ex: Janelas" className={`w-full px-5 py-4 rounded-2xl border outline-none ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-200'}`} />
-            </div>
+          
+          <div className="space-y-1">
+            <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Título do Produto</label>
+            <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex: Janela Integrada" className={`w-full px-5 py-4 rounded-2xl border outline-none ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-200'}`} />
           </div>
+
           <div className="space-y-1">
             <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Descrição</label>
             <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} placeholder="Descrição detalhada das especificações..." className={`w-full px-5 py-4 rounded-2xl border outline-none ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-200'}`} />
@@ -193,7 +180,8 @@ const AdminModal: React.FC<AdminModalProps> = ({ theme, onClose, onSave, editPro
             </div>
             {isProcessing && <div className="text-center py-2 text-fuzzi-blue animate-pulse text-xs font-black">Processando...</div>}
           </div>
-          <div className="flex gap-4">
+
+          <div className="flex gap-4 pt-2">
             <button type="button" onClick={onClose} className="flex-1 py-4 font-black opacity-50">Cancelar</button>
             <button type="submit" disabled={isProcessing} className="flex-1 py-4 bg-fuzzi-blue text-white font-black rounded-2xl shadow-lg">Confirmar</button>
           </div>

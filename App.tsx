@@ -37,9 +37,7 @@ const App: React.FC = () => {
   const [currentTestimonial, setCurrentTestimonial] = useState<Testimonial | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null); 
   
-  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(() => {
-    return localStorage.getItem('fuzzi_admin_session') === 'active';
-  });
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
 
   const [confirmDelete, setConfirmDelete] = useState<{
     isOpen: boolean;
@@ -100,7 +98,6 @@ const App: React.FC = () => {
         id: product.id,
         name: product.name,
         description: product.description,
-        category: product.category,
         images: uploadedImages,
         featured: product.featured,
         created_at: new Date().toISOString()
@@ -120,7 +117,6 @@ const App: React.FC = () => {
   };
 
   const handleSavePDF = async (pdf: CatalogPDF) => {
-    // Agora o CatalogPDFModal lida com o upload da imagem e retorna a URL pronta
     try {
       await supabase.from('site_config').upsert({ key: 'catalog', value: pdf });
       await fetchData();
@@ -174,20 +170,18 @@ const App: React.FC = () => {
   const onLoginSuccess = (password: string) => {
     if (password === '12') { 
       setIsAdminAuthenticated(true);
-      localStorage.setItem('fuzzi_admin_session', 'active');
     }
   };
 
   const onLogout = () => {
     setIsAdminAuthenticated(false);
-    localStorage.removeItem('fuzzi_admin_session');
   };
 
   const mainCatalog = pdfCatalogs[0] || INITIAL_PDF_CATALOGS[0];
   const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER.replace(/\D/g, '')}?text=${encodeURIComponent("Olá! Gostaria de falar com um vendedor sobre os produtos da Fuzzi.")}`;
 
   return (
-    <div className={`min-h-screen transition-theme flex flex-col overflow-x-hidden ${theme === 'dark' ? 'bg-[#050a14] text-white' : 'bg-white text-slate-900'}`}>
+    <div className={`min-h-screen transition-theme flex flex-col max-w-full overflow-x-hidden relative ${theme === 'dark' ? 'bg-[#050a14] text-white' : 'bg-white text-slate-900'}`}>
       <Header 
         theme={theme} view={view} setView={setView} toggleTheme={toggleTheme} 
         openAdminProduct={() => { setCurrentProduct(null); setIsEditing(false); setIsAdminProductOpen(true); }} 
@@ -202,14 +196,14 @@ const App: React.FC = () => {
         </div>
       )}
 
-      <main className={`flex-grow transition-opacity duration-700 ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
+      <main className={`flex-grow transition-opacity duration-700 max-w-full overflow-x-hidden ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
         <section id="inicio" className="container mx-auto px-4 pt-24 pb-12 md:pb-20 min-h-[90vh] flex items-center scroll-mt-24">
           <Hero theme={theme} setView={setView} heroImage={heroImage} isAdmin={isAdminAuthenticated} onHeroImageChange={handleHeroChange} />
         </section>
 
         <section id="diferenciais" className="py-12 md:py-24 scroll-mt-24"><Features theme={theme} /></section>
         
-        <section id="destaques" className="container mx-auto px-4 py-8 md:py-24 scroll-mt-24">
+        <section id="destaques" className="container mx-auto px-4 py-8 md:py-24 scroll-mt-24 overflow-x-hidden">
           <div className="max-w-7xl mx-auto mb-10">
             <div className="text-left">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-fuzzi-blue/10 text-fuzzi-blue text-[10px] font-black uppercase tracking-[0.2em] mb-4 md:mb-6 border border-fuzzi-blue/5 shadow-sm">
@@ -217,7 +211,7 @@ const App: React.FC = () => {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-fuzzi-blue opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-fuzzi-blue"></span>
                 </span>
-                Nossos Destaques
+                Vitrine Principal
               </div>
               <h2 className="text-4xl md:text-6xl font-black leading-tight">Projetos em <span className="text-fuzzi-blue">Destaque</span></h2>
               <p className="mt-3 text-base md:text-lg opacity-60 font-medium max-w-2xl">
@@ -238,13 +232,13 @@ const App: React.FC = () => {
           </div>
         </section>
 
-        <section id="depoimentos" className="pt-8 pb-10 md:py-24 scroll-mt-24 md:min-h-[90vh] flex items-center">
+        <section id="depoimentos" className="pt-8 pb-10 md:py-24 scroll-mt-24 md:min-h-[90vh] flex items-center overflow-x-hidden">
           <div className="w-full">
             <Testimonials theme={theme} testimonials={testimonials} isAdmin={isAdminAuthenticated} onEdit={(t)=>{setCurrentTestimonial(t);setIsAdminTestimonialOpen(true)}} onDelete={(id)=>setConfirmDelete({isOpen:true, type:'testimonial', id})} />
           </div>
         </section>
 
-        <section id="catalogo" className="pt-10 pb-12 md:py-32 scroll-mt-24 md:min-h-[90vh] flex items-center">
+        <section id="catalogo" className="pt-10 pb-12 md:py-32 scroll-mt-24 md:min-h-[90vh] flex items-center overflow-x-hidden">
           <div className="container mx-auto px-4 w-full">
             <div className={`relative overflow-hidden rounded-[2.5rem] md:rounded-[4rem] border shadow-2xl transition-all duration-500 ${theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
               <div className="grid grid-cols-1 lg:grid-cols-2 items-stretch">

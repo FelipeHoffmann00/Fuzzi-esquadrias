@@ -41,7 +41,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, theme, onEdit, onDel
           }}
         />
         
-        {/* Overlay Detalhes - Transparente com Blur */}
+        {/* Overlay Detalhes */}
         <div className="absolute inset-0 flex items-center justify-center opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-500">
           <div className="bg-white/5 border border-white/20 backdrop-blur-md text-white px-3 py-1.5 md:px-5 md:py-2.5 rounded-full font-black flex items-center gap-1.5 md:gap-2 transform shadow-2xl scale-90 lg:scale-100 lg:translate-y-4 lg:group-hover:translate-y-0">
             <Maximize2 className="w-3 h-3 md:w-4 md:h-4 text-fuzzi-blue" /> 
@@ -82,16 +82,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, theme, onEdit, onDel
 
       {/* Informações do Produto */}
       <div className="pt-1.5 px-3 pb-3 md:p-8 flex flex-col flex-1">
-        {/* Categoria e Destaque lado a lado */}
+        {/* Substituição de categoria por DESTAQUE */}
         <div className="flex flex-wrap items-center gap-1.5 md:gap-3 mb-1.5 md:mb-4">
-          <span className="text-[7px] md:text-[10px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] text-fuzzi-blue/80 bg-fuzzi-blue/10 px-1.5 py-0.5 rounded whitespace-nowrap">
-            {product.category}
+          <span className="flex items-center gap-1.5 text-[8px] md:text-[11px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] text-fuzzi-blue/90 bg-fuzzi-blue/10 px-2 py-1 rounded-lg whitespace-nowrap border border-fuzzi-blue/5">
+            <Star className="w-2.5 h-2.5 md:w-3 md:h-3 fill-current" />
+            DESTAQUE
           </span>
-          {product.featured && (
-            <span className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 text-[7px] md:text-[9px] font-black uppercase tracking-[0.05em] md:tracking-[0.1em] border border-amber-500/20 whitespace-nowrap">
-              <Star className="w-2 h-2 md:w-2.5 md:h-2.5 fill-current" /> Destaque
-            </span>
-          )}
         </div>
 
         <h3 className={`text-xs md:text-2xl font-black mb-2 md:mb-6 transition-colors duration-300 leading-tight group-hover:text-fuzzi-blue line-clamp-2 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>

@@ -4,18 +4,10 @@ export interface Product {
   name: string;
   description: string;
   images: string[];
-  category: string;
   featured: boolean;
 }
 
-export interface CatalogPDF {
-  id: string;
-  title: string;
-  coverImage: string;
-  pdfUrl: string;
-  category: string;
-}
-
+// Added Testimonial interface to fix export error
 export interface Testimonial {
   id: string;
   name: string;
@@ -24,6 +16,15 @@ export interface Testimonial {
   rating: number;
   image: string;
   service: string;
+}
+
+export interface CatalogPDF {
+  id: string;
+  title: string;
+  coverImage: string;
+  pdfUrl: string;
+  // Added category property to fix property not found error in Catalog.tsx
+  category?: string;
 }
 
 export type Theme = 'light' | 'dark';

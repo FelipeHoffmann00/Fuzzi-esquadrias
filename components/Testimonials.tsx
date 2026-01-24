@@ -96,8 +96,8 @@ const Testimonials: React.FC<TestimonialsProps> = ({ theme, testimonials, isAdmi
   if (testimonials.length === 0) return null;
 
   return (
-    <div className="pt-8 pb-4 md:pt-32 md:pb-20 relative z-20 select-none overflow-visible">
-      <div className="container mx-auto px-4 overflow-visible">
+    <div className="pt-8 pb-4 md:pt-32 md:pb-20 relative z-20 select-none overflow-hidden">
+      <div className="container mx-auto px-4 max-w-full">
         {/* Cabeçalho */}
         <div className="max-w-7xl mx-auto mb-4 md:mb-6">
           <div className="text-left">
@@ -124,7 +124,7 @@ const Testimonials: React.FC<TestimonialsProps> = ({ theme, testimonials, isAdmi
           onTouchMove={(e) => setTouchEnd(e.targetTouches[0].clientX)}
           onTouchEnd={() => { handleSwipeCheck(); startTimers(); }}
         >
-          <div className="relative w-full h-full flex items-center justify-center perspective-1000 overflow-visible">
+          <div className="relative w-full h-full flex items-center justify-center perspective-1000">
             {testimonials.map((testimonial, index) => {
               const total = testimonials.length;
               let position = "hidden";
@@ -141,9 +141,9 @@ const Testimonials: React.FC<TestimonialsProps> = ({ theme, testimonials, isAdmi
                     position === "active" 
                       ? "z-50 opacity-100 translate-x-0 scale-100 shadow-[0_40px_80px_-15px_rgba(0,0,0,0.3)] blur-0 ring-4 ring-fuzzi-blue/5" 
                       : position === "prev"
-                        ? "z-20 opacity-30 -translate-x-[50%] md:-translate-x-[60%] scale-[0.8] blur-sm grayscale pointer-events-none"
+                        ? "z-20 opacity-30 -translate-x-[45%] md:-translate-x-[60%] scale-[0.8] blur-sm grayscale pointer-events-none"
                         : position === "next"
-                          ? "z-20 opacity-30 translate-x-[50%] md:translate-x-[60%] scale-[0.8] blur-sm grayscale pointer-events-none"
+                          ? "z-20 opacity-30 translate-x-[45%] md:translate-x-[60%] scale-[0.8] blur-sm grayscale pointer-events-none"
                           : "z-10 opacity-0 scale-50 translate-x-0 pointer-events-none blur-xl"
                   } ${
                     theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100'

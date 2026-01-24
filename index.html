@@ -3,7 +3,7 @@
 <html lang="pt-BR" style="scroll-behavior: smooth;">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Fuzzi Esquadrias | Design e Qualidade Premium</title>
     <meta name="description" content="Especialista em esquadrias de alumínio de alto padrão em Sumaré e região. Janelas integradas, portões e soluções sob medida." />
     
@@ -40,14 +40,25 @@
       }
     </script>
     <style>
+      html, body {
+        max-width: 100%;
+        overflow-x: hidden;
+        position: relative;
+        /* Impede o gesto de "voltar" ao puxar lateralmente no mobile */
+        overscroll-behavior-x: none;
+      }
+      
       body {
         font-family: 'Plus Jakarta Sans', sans-serif;
         text-rendering: optimizeLegibility;
         -webkit-font-smoothing: antialiased;
+        width: 100%;
       }
+
       .transition-theme {
         transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1), color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
       }
+
       .fix-clipping {
         -webkit-mask-image: -webkit-radial-gradient(white, black);
         mask-image: -webkit-radial-gradient(white, black);
@@ -55,6 +66,7 @@
         backface-visibility: hidden;
         transform: translateZ(0);
       }
+
       ::-webkit-scrollbar {
         width: 8px;
       }
@@ -79,6 +91,13 @@
       }
       .float-animation {
         animation: float 6s ease-in-out infinite;
+      }
+
+      /* Garante que elementos absolutos não vazem */
+      #root {
+        width: 100%;
+        overflow-x: hidden;
+        position: relative;
       }
     </style>
   <script type="importmap">
