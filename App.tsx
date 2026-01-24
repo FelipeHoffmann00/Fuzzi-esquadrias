@@ -37,7 +37,6 @@ const App: React.FC = () => {
   const [currentTestimonial, setCurrentTestimonial] = useState<Testimonial | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null); 
   
-  // No futuro, isso deve ser substituído por supabase.auth.getSession()
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(() => {
     return localStorage.getItem('fuzzi_admin_session') === 'active';
   });
@@ -121,18 +120,12 @@ const App: React.FC = () => {
   };
 
   const handleSavePDF = async (pdf: CatalogPDF) => {
-    setIsLoading(true);
+    // Agora o CatalogPDFModal lida com o upload da imagem e retorna a URL pronta
     try {
-      const coverUrl = pdf.coverImage.startsWith('data:') ? await uploadImage(pdf.coverImage, 'catalogs') : pdf.coverImage;
-      const pdfToSave = { ...pdf, coverImage: coverUrl };
-      
-      await supabase.from('site_config').upsert({ key: 'catalog', value: pdfToSave });
+      await supabase.from('site_config').upsert({ key: 'catalog', value: pdf });
       await fetchData();
-      setIsAdminPDFOpen(false);
     } catch (e) {
-      alert("Erro ao salvar catálogo.");
-    } finally {
-      setIsLoading(false);
+      alert("Erro ao salvar configuração do catálogo.");
     }
   };
 
@@ -204,9 +197,8 @@ const App: React.FC = () => {
       />
 
       {isLoading && (
-        <div className="fixed inset-0 z-[200] bg-[#050a14]/60 backdrop-blur-xl flex flex-col items-center justify-center gap-4">
+        <div className="fixed inset-0 z-[200] bg-[#050a14]/60 backdrop-blur-xl flex items-center justify-center">
           <Loader2 className="w-12 h-12 text-fuzzi-blue animate-spin" />
-          <p className="text-fuzzi-blue font-bold tracking-widest text-[10px] uppercase animate-pulse">Carregando Fuzzi Esquadrias...</p>
         </div>
       )}
 

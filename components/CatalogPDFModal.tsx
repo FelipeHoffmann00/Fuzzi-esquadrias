@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { X, FileText, Image as ImageIcon, AlertCircle, Check, Upload, Loader2, ZoomIn, Maximize, CheckCircle2 } from 'lucide-react';
+import { X, FileText, Image as ImageIcon, AlertCircle, Link, Loader2, CheckCircle2, UploadCloud, FileCheck } from 'lucide-react';
 import { CatalogPDF, Theme } from '../types';
+import { uploadFile } from '../supabase';
 
 interface CatalogPDFModalProps {
   theme: Theme;
@@ -12,202 +13,230 @@ interface CatalogPDFModalProps {
 
 const CatalogPDFModal: React.FC<CatalogPDFModalProps> = ({ theme, onClose, onSave, editPDF }) => {
   const [title, setTitle] = useState('');
-  const [category, setCategory] = useState('Principal');
   const [coverImage, setCoverImage] = useState('');
   const [pdfUrl, setPdfUrl] = useState('');
-  const [pdfFileName, setPdfFileName] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Estados de Upload
+  const [imgProgress, setImgProgress] = useState(0);
+  const [isImgUploading, setIsImgUploading] = useState(false);
+  
+  const [pdfProgress, setPdfProgress] = useState(0);
+  const [isPdfUploading, setIsPdfUploading] = useState(false);
+  const [pdfFileName, setPdfFileName] = useState<string | null>(null);
+
   const [saveSuccess, setSaveSuccess] = useState(false);
   
-  // Crop States
-  const [tempImage, setTempImage] = useState<string | null>(null);
-  const [isCropping, setIsCropping] = useState(false);
-  const [zoom, setZoom] = useState(1);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [startPos, setStartPos] = useState({ x: 0, y: 0 });
-  const [showGuides, setShowGuides] = useState(false);
-  
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const imgInputRef = useRef<HTMLInputElement>(null);
   const pdfInputRef = useRef<HTMLInputElement>(null);
-  const viewerRef = useRef<HTMLDivElement>(null);
-  const imgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
     if (editPDF) {
       setTitle(editPDF.title);
-      setCategory(editPDF.category);
       setCoverImage(editPDF.coverImage);
-      setPdfUrl(editPDF.pdfUrl);
-      if (editPDF.pdfUrl.startsWith('data:application/pdf')) {
-        setPdfFileName('Arquivo PDF carregado');
-      }
+      setPdfUrl(editPDF.pdfUrl === '#' ? '' : editPDF.pdfUrl);
     }
   }, [editPDF]);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setTempImage(event.target?.result as string);
-      setIsCropping(true);
-      setZoom(1.1);
-      setPosition({ x: 0, y: 0 });
-    };
-    reader.readAsDataURL(file);
+    setIsImgUploading(true);
+    setImgProgress(0);
+    setError(null);
+
+    try {
+      const publicUrl = await uploadFile(file, 'catalogs/covers', (p) => setImgProgress(p));
+      setCoverImage(publicUrl);
+    } catch (err) {
+      setError("Erro ao subir imagem.");
+    } finally {
+      setIsImgUploading(false);
+    }
   };
 
-  const onMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
-    setIsDragging(true);
-    setShowGuides(true);
-    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-    setStartPos({ x: clientX - position.x, y: clientY - position.y });
-  };
-
-  const onMouseMove = (e: React.MouseEvent | React.TouchEvent) => {
-    if (!isDragging) return;
-    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-    setPosition({ x: clientX - startPos.x, y: clientY - startPos.y });
-  };
-
-  const stopDragging = () => {
-    setIsDragging(false);
-    setShowGuides(false);
-  };
-
-  const handleApplyCrop = () => {
-    if (!imgRef.current || !viewerRef.current) return;
-
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    canvas.width = 1000;
-    canvas.height = 1000;
-
-    const viewer = viewerRef.current.getBoundingClientRect();
-    const img = imgRef.current.getBoundingClientRect();
-
-    const scaleX = imgRef.current.naturalWidth / img.width;
-    const scaleY = imgRef.current.naturalHeight / img.height;
-
-    const cropX = (viewer.left - img.left) * scaleX;
-    const cropY = (viewer.top - img.top) * scaleY;
-    const cropW = viewer.width * scaleX;
-    const cropH = viewer.height * scaleY;
-
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(imgRef.current, cropX, cropY, cropW, cropH, 0, 0, canvas.width, canvas.height);
-
-    setCoverImage(canvas.toDataURL('image/jpeg', 1.0));
-    setIsCropping(false);
-    setTempImage(null);
-  };
-
-  const handlePdfUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePDFChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
     if (file.type !== 'application/pdf') {
-      setError("Por favor, selecione apenas arquivos no formato PDF.");
+      setError("Por favor, selecione apenas arquivos PDF.");
       return;
     }
+
+    setIsPdfUploading(true);
+    setPdfProgress(0);
     setError(null);
-    setIsProcessing(true);
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setPdfUrl(event.target?.result as string);
-      setPdfFileName(file.name);
-      setIsProcessing(false);
-    };
-    reader.readAsDataURL(file);
+    setPdfFileName(file.name);
+
+    try {
+      const publicUrl = await uploadFile(file, 'catalogs/files', (p) => setPdfProgress(p));
+      setPdfUrl(publicUrl);
+    } catch (err) {
+      setError("Erro ao subir arquivo PDF.");
+      setPdfFileName(null);
+    } finally {
+      setIsPdfUploading(false);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title) { setError("O título é obrigatório."); return; }
+    if (!title.trim()) { setError("O título é obrigatório."); return; }
     if (!coverImage) { setError("A imagem de capa é obrigatória."); return; }
-    if (!pdfUrl) { setError("Selecione um PDF."); return; }
+    if (!pdfUrl.trim()) { setError("Faça o upload do PDF ou insira um link."); return; }
 
-    setIsProcessing(true);
+    setSaveSuccess(true);
     setTimeout(() => {
       onSave({
         id: editPDF?.id || 'main_catalog',
-        title,
-        category,
+        title: title.trim(),
+        category: 'Principal',
         coverImage,
-        pdfUrl
+        pdfUrl: pdfUrl.trim()
       });
-      setIsProcessing(false);
-      setSaveSuccess(true);
-      setTimeout(onClose, 1500);
-    }, 800);
+      onClose();
+    }, 1200);
   };
 
+  const inputClasses = `w-full px-5 py-4 rounded-2xl border outline-none font-bold transition-all ${
+    theme === 'dark' ? 'bg-slate-800 border-slate-700 focus:border-fuzzi-blue' : 'bg-slate-50 border-slate-100 focus:border-fuzzi-blue shadow-inner'
+  }`;
+
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-300">
-      <div className={`w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 ${
+    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
+      <div className={`w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 ${
         theme === 'dark' ? 'bg-slate-900 border border-slate-800 text-white' : 'bg-white text-slate-900'
       }`}>
         
         {saveSuccess ? (
           <div className="p-16 flex flex-col items-center justify-center text-center space-y-6">
-            <div className="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center shadow-2xl shadow-green-500/30 animate-bounce">
-              <CheckCircle2 className="w-14 h-14 text-white" />
+            <div className="w-20 h-20 bg-fuzzi-blue rounded-full flex items-center justify-center shadow-2xl shadow-fuzzi-blue/30 animate-bounce">
+              <CheckCircle2 className="w-10 h-10 text-white" />
             </div>
-            <h3 className="text-2xl font-black">Catálogo Atualizado!</h3>
-          </div>
-        ) : isCropping && tempImage ? (
-          <div className="p-8 space-y-8">
-            <div className="text-center">
-              <h3 className="text-xl font-black text-fuzzi-blue mb-1">Capa do Catálogo</h3>
-              <p className="text-[10px] font-black uppercase text-slate-400">Arraste para ajustar</p>
-            </div>
-            <div 
-              ref={viewerRef}
-              className="relative w-full max-w-[280px] aspect-square mx-auto rounded-[2rem] overflow-hidden bg-slate-100 border-[4px] border-fuzzi-blue shadow-2xl cursor-move touch-none"
-              onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={stopDragging} onMouseLeave={stopDragging} onTouchStart={onMouseDown} onTouchMove={onMouseMove} onTouchEnd={stopDragging}
-            >
-              <img ref={imgRef} src={tempImage} className="absolute max-w-none pointer-events-none" style={{ transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`, left: '50%', top: '50%', width: '100%', height: 'auto', marginLeft: '-50%', marginTop: '-50%' }} />
-            </div>
-            <div className="space-y-4">
-              <input type="range" min="0.5" max="5" step="0.01" value={zoom} onChange={(e) => setZoom(parseFloat(e.target.value))} className="w-full accent-fuzzi-blue h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer" />
-              <div className="flex gap-3">
-                <button type="button" onClick={() => setIsCropping(false)} className="px-6 py-4 font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 rounded-2xl">Cancelar</button>
-                <button type="button" onClick={handleApplyCrop} className="flex-1 py-4 bg-fuzzi-blue text-white font-black rounded-2xl shadow-xl">Aplicar Recorte</button>
-              </div>
-            </div>
+            <h3 className="text-xl font-black uppercase tracking-widest">Catálogo Salvo!</h3>
           </div>
         ) : (
           <>
-            <div className="p-6 border-b border-inherit flex items-center justify-between sticky top-0 bg-inherit z-10">
-              <h2 className="text-xl font-black">Editar Catálogo do Site</h2>
-              <button onClick={onClose} className="p-2 hover:text-red-500"><X className="w-6 h-6" /></button>
+            <div className="p-6 border-b border-inherit flex items-center justify-between">
+              <h2 className="text-lg font-black uppercase tracking-tight">Configurar Catálogo</h2>
+              <button onClick={onClose} className="p-2 hover:text-red-500 transition-colors"><X className="w-6 h-6" /></button>
             </div>
-            <form onSubmit={handleSubmit} className="p-8 space-y-6">
-              {error && <div className="p-4 bg-red-50 text-red-600 rounded-2xl text-sm font-bold flex gap-2 animate-in slide-in-from-top-2"><AlertCircle className="w-5 h-5 flex-shrink-0"/> {error}</div>}
+
+            <form onSubmit={handleSubmit} className="p-8 space-y-7">
+              {error && (
+                <div className="p-4 bg-red-500/10 text-red-500 rounded-2xl text-[10px] font-black uppercase flex gap-2 animate-in slide-in-from-top-2">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0"/> {error}
+                </div>
+              )}
+              
+              {/* Seleção de Capa */}
               <div className="flex flex-col items-center gap-2">
-                <button type="button" onClick={() => fileInputRef.current?.click()} className={`relative aspect-square w-32 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center overflow-hidden transition-all hover:border-fuzzi-blue group ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-blue-100'}`}>
-                  {coverImage ? <img src={coverImage} className="w-full h-full object-cover" /> : <ImageIcon className="w-8 h-8 text-fuzzi-blue group-hover:scale-110" />}
-                </button>
-                <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageChange} />
-                <span className="text-[9px] font-black uppercase text-slate-400">Imagem de Destaque</span>
+                <div className="relative">
+                  <button 
+                    type="button" 
+                    disabled={isImgUploading}
+                    onClick={() => imgInputRef.current?.click()} 
+                    className={`relative w-28 h-28 rounded-3xl border-2 border-dashed flex flex-col items-center justify-center overflow-hidden transition-all hover:border-fuzzi-blue ${
+                      theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-blue-50'
+                    }`}
+                  >
+                    {coverImage && !isImgUploading ? (
+                      <img src={coverImage} className="w-full h-full object-cover" />
+                    ) : isImgUploading ? (
+                      <div className="flex flex-col items-center gap-1">
+                        <Loader2 className="w-5 h-5 text-fuzzi-blue animate-spin" />
+                        <span className="text-[12px] font-black text-fuzzi-blue">{imgProgress}%</span>
+                      </div>
+                    ) : (
+                      <ImageIcon className="w-6 h-6 text-fuzzi-blue/40" />
+                    )}
+                  </button>
+                  {isImgUploading && (
+                    <div className="absolute -bottom-1 left-0 right-0 h-1 bg-slate-700 rounded-full overflow-hidden">
+                      <div className="h-full bg-fuzzi-blue transition-all" style={{ width: `${imgProgress}%` }}></div>
+                    </div>
+                  )}
+                </div>
+                <input type="file" ref={imgInputRef} className="hidden" accept="image/*" onChange={handleImageChange} />
+                <span className="text-[9px] font-black uppercase text-slate-500">Capa do Catálogo</span>
               </div>
-              <div className="space-y-4">
-                <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="Título (ex: Catálogo Geral 2024)" className={`w-full px-5 py-4 rounded-2xl border outline-none ${theme === 'dark' ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-fuzzi-blue/5 text-slate-900'}`} />
-                <button type="button" onClick={() => pdfInputRef.current?.click()} className={`w-full flex items-center justify-center gap-3 px-6 py-4 rounded-2xl border-2 border-dashed font-bold transition-all ${pdfUrl.startsWith('data:') ? 'bg-green-500/10 border-green-500 text-green-500' : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-fuzzi-blue'}`}>
-                  <Upload className="w-5 h-5" /> {pdfFileName || 'Fazer Upload do PDF'}
-                </button>
-                <input type="file" ref={pdfInputRef} className="hidden" accept="application/pdf" onChange={handlePdfUpload} />
+
+              <div className="space-y-5">
+                <div className="space-y-1">
+                  <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Nome do Catálogo</label>
+                  <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="Ex: Catálogo Geral" className={inputClasses} />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Arquivo do Catálogo (PDF)</label>
+                  
+                  <div className="flex flex-col gap-3">
+                    <button 
+                      type="button"
+                      disabled={isPdfUploading}
+                      onClick={() => pdfInputRef.current?.click()}
+                      className={`relative w-full py-4 rounded-2xl border-2 border-dashed flex items-center justify-center gap-3 transition-all ${
+                        isPdfUploading ? 'border-fuzzi-blue bg-fuzzi-blue/5' : pdfUrl ? 'border-green-500/30 bg-green-500/5' : 'border-slate-700 hover:border-fuzzi-blue'
+                      }`}
+                    >
+                      {isPdfUploading ? (
+                        <div className="flex items-center gap-3">
+                          <Loader2 className="w-5 h-5 text-fuzzi-blue animate-spin" />
+                          <span className="text-xs font-black uppercase text-fuzzi-blue">Enviando: {pdfProgress}%</span>
+                        </div>
+                      ) : pdfUrl ? (
+                        <div className="flex items-center gap-3 text-green-500">
+                          <FileCheck className="w-5 h-5" />
+                          <span className="text-xs font-black uppercase truncate max-w-[200px]">{pdfFileName || 'PDF Pronto'}</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-3 opacity-60">
+                          <UploadCloud className="w-5 h-5" />
+                          <span className="text-xs font-black uppercase">Fazer Upload do PDF</span>
+                        </div>
+                      )}
+                      
+                      {isPdfUploading && (
+                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-slate-800">
+                          <div className="h-full bg-fuzzi-blue shadow-[0_0_8px_rgba(0,207,255,0.5)] transition-all" style={{ width: `${pdfProgress}%` }}></div>
+                        </div>
+                      )}
+                    </button>
+                    <input type="file" ref={pdfInputRef} className="hidden" accept="application/pdf" onChange={handlePDFChange} />
+
+                    <div className="flex items-center gap-4 px-2">
+                      <div className="h-px flex-1 bg-slate-800"></div>
+                      <span className="text-[8px] font-black uppercase opacity-30">Ou use um link</span>
+                      <div className="h-px flex-1 bg-slate-800"></div>
+                    </div>
+
+                    <div className="relative group">
+                      <div className="absolute left-5 top-1/2 -translate-y-1/2 text-fuzzi-blue opacity-50">
+                        <Link className="w-4 h-4" />
+                      </div>
+                      <input 
+                        type="url" 
+                        value={pdfUrl} 
+                        onChange={e => setPdfUrl(e.target.value)} 
+                        placeholder="Link do Google Drive..." 
+                        className={`${inputClasses} pl-12 text-xs py-3`} 
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="flex gap-4 pt-4">
-                <button type="button" onClick={onClose} className="flex-1 py-5 font-black text-slate-500">Cancelar</button>
-                <button type="submit" disabled={isProcessing} className="flex-1 py-5 bg-fuzzi-blue text-white font-black rounded-2xl shadow-xl shadow-fuzzi-blue/20">Salvar Catálogo</button>
+
+              <div className="flex gap-4 pt-2">
+                <button type="button" onClick={onClose} className="flex-1 py-4 font-black text-slate-500 text-xs">Cancelar</button>
+                <button 
+                  type="submit" 
+                  disabled={isImgUploading || isPdfUploading}
+                  className="flex-[2] py-4 bg-fuzzi-blue text-white font-black rounded-2xl shadow-xl shadow-fuzzi-blue/20 hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-50 text-xs uppercase tracking-widest"
+                >
+                  Salvar Catálogo
+                </button>
               </div>
             </form>
           </>
