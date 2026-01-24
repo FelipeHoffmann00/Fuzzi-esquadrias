@@ -96,12 +96,12 @@ const Testimonials: React.FC<TestimonialsProps> = ({ theme, testimonials, isAdmi
   if (testimonials.length === 0) return null;
 
   return (
-    <section className="py-12 md:py-20 relative z-20 select-none overflow-visible">
+    <section className="pt-20 pb-12 md:pt-32 md:pb-20 relative z-20 select-none overflow-visible">
       <div className="container mx-auto px-4 overflow-visible">
-        {/* Cabeçalho alinhado */}
-        <div className="max-w-7xl mx-auto mb-8 md:mb-12">
+        {/* Cabeçalho - Espaçamento reduzido no mb (margin bottom) para colar nos cards e aumentado no topo da section */}
+        <div className="max-w-7xl mx-auto mb-4 md:mb-6">
           <div className="text-left">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-fuzzi-blue/10 text-fuzzi-blue text-[10px] font-black uppercase tracking-[0.2em] mb-6 md:mb-10 border border-fuzzi-blue/5 shadow-sm">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-fuzzi-blue/10 text-fuzzi-blue text-[10px] font-black uppercase tracking-[0.2em] mb-4 md:mb-6 border border-fuzzi-blue/5 shadow-sm">
               <span className="relative flex h-1.5 w-1.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-fuzzi-blue opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-fuzzi-blue"></span>
@@ -117,8 +117,9 @@ const Testimonials: React.FC<TestimonialsProps> = ({ theme, testimonials, isAdmi
           </div>
         </div>
 
+        {/* CONTAINER DOS CARDS */}
         <div 
-          className="relative max-w-5xl mx-auto h-[400px] md:h-[500px] flex items-center justify-center cursor-grab active:cursor-grabbing touch-pan-y overflow-visible mb-2 md:mb-4"
+          className="relative max-w-5xl mx-auto h-[380px] md:h-[480px] flex items-center justify-center cursor-grab active:cursor-grabbing touch-pan-y overflow-visible mb-0"
           onTouchStart={(e) => { setTouchEnd(null); setTouchStart(e.targetTouches[0].clientX); }}
           onTouchMove={(e) => setTouchEnd(e.targetTouches[0].clientX)}
           onTouchEnd={() => { handleSwipeCheck(); startTimers(); }}
@@ -207,7 +208,8 @@ const Testimonials: React.FC<TestimonialsProps> = ({ theme, testimonials, isAdmi
           <button onClick={onNextClick} className="hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 z-40 p-4 rounded-full bg-slate-900/50 text-white backdrop-blur-md hover:bg-fuzzi-blue transition-all -mr-12"><ChevronRight className="w-8 h-8" /></button>
         </div>
 
-        <div className="mt-2 md:mt-4 max-w-xs mx-auto space-y-2">
+        {/* INDICADORES */}
+        <div className="mt-0 max-w-xs mx-auto space-y-2">
           <div className={`h-1 w-full rounded-full overflow-hidden ${theme === 'dark' ? 'bg-slate-800' : 'bg-slate-100'}`}>
             <div className="h-full bg-fuzzi-blue transition-all duration-300 ease-linear" style={{ width: `${progress}%` }}></div>
           </div>

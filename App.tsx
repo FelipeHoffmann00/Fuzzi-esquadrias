@@ -199,13 +199,15 @@ const App: React.FC = () => {
       )}
 
       <main className="flex-grow">
+        {/* INICIO alinhado no topo */}
         <section id="inicio" className="container mx-auto px-4 pt-24 pb-12 md:pb-20 min-h-[90vh] flex items-center scroll-mt-24">
           <Hero theme={theme} setView={setView} heroImage={heroImage} isAdmin={isAdminAuthenticated} onHeroImageChange={handleHeroChange} />
         </section>
 
-        <section id="diferenciais" className="py-12 md:py-20 scroll-mt-20 md:scroll-mt-28"><Features theme={theme} /></section>
+        {/* Demais seções com scroll-mt para facilitar a centralização perfeita */}
+        <section id="diferenciais" className="py-12 md:py-24 scroll-mt-24"><Features theme={theme} /></section>
         
-        <section id="destaques" className="container mx-auto px-4 py-10 md:py-20 scroll-mt-20 md:scroll-mt-28">
+        <section id="destaques" className="container mx-auto px-4 py-12 md:py-24 scroll-mt-24">
           <div className="max-w-7xl mx-auto mb-10">
             <div className="text-left">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-fuzzi-blue/10 text-fuzzi-blue text-[10px] font-black uppercase tracking-[0.2em] mb-4 md:mb-6 border border-fuzzi-blue/5 shadow-sm">
@@ -234,13 +236,13 @@ const App: React.FC = () => {
           </div>
         </section>
 
-        <section id="depoimentos" className="py-10 scroll-mt-20 md:scroll-mt-28 min-h-[90vh] flex items-center">
+        <section id="depoimentos" className="py-12 md:py-24 scroll-mt-24 min-h-[90vh] flex items-center">
           <div className="w-full">
             <Testimonials theme={theme} testimonials={testimonials} isAdmin={isAdminAuthenticated} onEdit={(t)=>{setCurrentTestimonial(t);setIsAdminTestimonialOpen(true)}} onDelete={(id)=>setConfirmDelete({isOpen:true, type:'testimonial', id})} />
           </div>
         </section>
 
-        <section id="catalogo" className="py-10 md:py-24 scroll-mt-20 md:scroll-mt-28 min-h-[90vh] flex items-center">
+        <section id="catalogo" className="py-12 md:py-32 scroll-mt-24 min-h-[90vh] flex items-center">
           <div className="container mx-auto px-4 w-full">
             <div className={`relative overflow-hidden rounded-[2.5rem] md:rounded-[4rem] border shadow-2xl ${theme === 'dark' ? 'bg-[#0a0f1a] border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
               <div className="grid grid-cols-1 lg:grid-cols-2 items-stretch">
