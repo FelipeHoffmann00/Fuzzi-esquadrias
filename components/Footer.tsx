@@ -208,15 +208,15 @@ const Footer: React.FC<FooterProps> = ({ theme, isAdmin, onAdminToggle, onLogin,
         <div className={`pt-8 border-t flex flex-col md:flex-row items-center justify-center gap-4 md:gap-12 text-[10px] uppercase tracking-wider font-medium text-center ${
            theme === 'dark' ? 'border-slate-800 text-slate-500' : 'border-slate-200 text-slate-400'
         }`}>
-          <p>© {new Date().getFullYear()} Fuzzi Esquadrias. Todos os direitos reservados.</p>
+          <p className="text-[9px] md:text-[10px]">© {new Date().getFullYear()} Fuzzi Esquadrias. Todos os direitos reservados.</p>
           
           <a 
             href="https://www.linkedin.com/in/felipe-hoffmann-9bb7361a4/" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="hover:text-fuzzi-blue transition-colors"
+            className="hover:text-fuzzi-blue transition-colors text-[8px] md:text-[10px]"
           >
-            Desenvolvido por Felipe Hoffmann
+            Desenvolvido por <span className="no-underline">Felipe Hoffmann</span>
           </a>
         </div>
       </div>

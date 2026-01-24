@@ -1,6 +1,6 @@
 
-import React, { useRef, useState, useEffect } from 'react';
-import { Camera, Loader2, Maximize, ZoomIn, Check, X, Move } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { Camera, ZoomIn, Check, X } from 'lucide-react';
 import { Theme, View } from '../types';
 
 interface HeroProps {
@@ -13,7 +13,6 @@ interface HeroProps {
 
 const Hero: React.FC<HeroProps> = ({ theme, setView, heroImage, isAdmin, onHeroImageChange }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
   
   // Crop States
   const [tempImage, setTempImage] = useState<string | null>(null);
@@ -64,7 +63,6 @@ const Hero: React.FC<HeroProps> = ({ theme, setView, heroImage, isAdmin, onHeroI
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Resolução otimizada para o Hero Horizontal (1.6:1)
     canvas.width = 1600;
     canvas.height = 1000;
 
@@ -90,37 +88,50 @@ const Hero: React.FC<HeroProps> = ({ theme, setView, heroImage, isAdmin, onHeroI
   };
 
   return (
-    <div className="py-8 md:py-20 flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
-      <div className="flex-1 text-center lg:text-left animate-in slide-in-from-left-8 duration-700">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-fuzzi-blue/10 text-fuzzi-blue text-[10px] font-black uppercase tracking-[0.2em] mb-6 md:mb-8 mx-auto lg:mx-0">
-          <span className="relative flex h-2 w-2">
+    <div className="w-full pt-6 pb-12 md:py-24 flex flex-col lg:flex-row items-center gap-10 lg:gap-20">
+      {/* Container de Texto: Alinhado à esquerda no Mobile e Desktop */}
+      <div className="flex-1 text-left animate-in fade-in slide-in-from-left-4 duration-1000 relative z-20 px-6 md:px-0">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-fuzzi-blue/10 text-fuzzi-blue text-[10px] font-black uppercase tracking-[0.2em] mb-6 md:mb-10 border border-fuzzi-blue/5 shadow-sm">
+          <span className="relative flex h-1.5 w-1.5">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-fuzzi-blue opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-fuzzi-blue"></span>
+            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-fuzzi-blue"></span>
           </span>
-          Qualidade em cada detalhe
+          Qualidade Premium
         </div>
-        <h1 className={`text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-extrabold mb-6 leading-[1.05] tracking-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-          Design & Qualidade <br />
-          em <span className="text-fuzzi-blue">Esquadrias</span>
+        
+        <h1 className={`text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-5 md:mb-6 leading-[1.1] tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+          Design & Qualidade em <span className="text-fuzzi-blue">Esquadrias</span>
         </h1>
-        <p className={`text-lg md:text-2xl mb-8 max-w-xl mx-auto lg:mx-0 opacity-70`}>
-          Soluções sob medida em alumínio para transformar seu ambiente com durabilidade e estética.
+        
+        <p className={`text-base md:text-2xl mb-1 lg:mb-8 max-w-2xl opacity-60 leading-relaxed font-medium text-left`}>
+          Soluções sob medida em alumínio para transformar seu ambiente com durabilidade e estética refinada.
         </p>
       </div>
 
-      <div className="flex-[1.2] w-full relative group mx-auto">
-        <div className={`relative overflow-hidden rounded-[2.5rem] md:rounded-[4rem] transition-all duration-700 ease-out ${
-          theme === 'dark' ? 'shadow-[0_30px_100px_-20px_rgba(0,100,255,0.3)]' : 'shadow-2xl'
-        }`}>
-          {/* FORMATO RETANGULAR HORIZONTAL (1.6:1) */}
+      {/* Container de Imagem */}
+      <div className="flex-[1.2] w-full relative group mx-auto px-4 md:px-0 z-10">
+        <div className={`relative overflow-hidden rounded-[2.5rem] md:rounded-[3.5rem] transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+          theme === 'dark' 
+            ? 'shadow-[0_30px_60px_-15px_rgba(0,0,0,0.6)]' 
+            : 'shadow-[0_30px_50px_-15px_rgba(0,0,0,0.1)]'
+        } md:hover:scale-[1.02] md:hover:shadow-[0_0_80px_-10px_rgba(0,207,255,0.2)]`}>
+          
           <img 
             key={heroImage.substring(0, 100)} 
             src={heroImage} 
-            className="w-full aspect-[1.6/1] object-cover"
+            className="w-full aspect-[1.3/1] md:aspect-[1.5/1] object-cover transition-transform duration-1000 md:group-hover:scale-105"
+            alt="Fuzzi Esquadrias de Alumínio"
           />
+
+          <div className={`absolute inset-0 bg-gradient-to-t pointer-events-none transition-opacity duration-500 ${
+            theme === 'dark' ? 'from-slate-950/40 to-transparent' : 'from-black/5 to-transparent'
+          }`}></div>
+          
           {isAdmin && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button onClick={() => fileInputRef.current?.click()} className="px-8 py-4 bg-fuzzi-blue text-white rounded-2xl font-black shadow-xl active:scale-90 flex items-center gap-2"><Camera className="w-5 h-5"/> Alterar Foto</button>
+              <button onClick={() => fileInputRef.current?.click()} className="px-8 py-4 bg-fuzzi-blue text-white rounded-2xl font-black shadow-xl active:scale-90 flex items-center gap-2 hover:bg-fuzzi-blue/90 transition-colors">
+                <Camera className="w-5 h-5"/> Alterar Foto
+              </button>
               <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
             </div>
           )}
@@ -128,19 +139,18 @@ const Hero: React.FC<HeroProps> = ({ theme, setView, heroImage, isAdmin, onHeroI
       </div>
 
       {isCropping && tempImage && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
-          <div className={`w-full max-w-2xl rounded-[3rem] overflow-hidden ${theme === 'dark' ? 'bg-slate-900 border border-slate-800' : 'bg-white'}`}>
-            <div className="p-6 border-b flex items-center justify-between"><h3 className="font-black">Ajustar Capa</h3><button onClick={() => setIsCropping(false)}><X /></button></div>
-            <div className="p-8 space-y-6">
-              {/* VIEWER EM FORMATO RETANGULAR */}
-              <div ref={viewerRef} className="relative w-full aspect-[1.6/1] rounded-[2rem] overflow-hidden bg-black border-4 border-fuzzi-blue touch-none" onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={stopDragging} onTouchStart={onMouseDown} onTouchMove={onMouseMove} onTouchEnd={stopDragging}>
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/95 backdrop-blur-lg">
+          <div className={`w-full max-w-2xl rounded-[3rem] overflow-hidden ${theme === 'dark' ? 'bg-slate-900 border border-slate-800' : 'bg-white shadow-2xl'}`}>
+            <div className="p-6 border-b flex items-center justify-between"><h3 className="font-black">Ajustar Capa</h3><button onClick={() => setIsCropping(false)} className="p-2 hover:bg-red-500/10 rounded-full transition-colors"><X className="w-6 h-6"/></button></div>
+            <div className="p-8 space-y-8">
+              <div ref={viewerRef} className="relative w-full aspect-[1.5/1] rounded-[2rem] overflow-hidden bg-black border-4 border-fuzzi-blue/30 touch-none shadow-inner" onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={stopDragging} onTouchStart={onMouseDown} onTouchMove={onMouseMove} onTouchEnd={stopDragging}>
                 <img ref={imgRef} src={tempImage} className="absolute max-w-none pointer-events-none" style={{ transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`, left: '50%', top: '50%', width: '100%', height: 'auto', marginLeft: '-50%', marginTop: '-50%' }} />
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-5 px-2">
                 <ZoomIn className="w-5 h-5 opacity-40" />
                 <input type="range" min="0.5" max="4" step="0.01" value={zoom} onChange={(e) => setZoom(parseFloat(e.target.value))} className="w-full accent-fuzzi-blue h-1.5 rounded-lg appearance-none bg-slate-200 dark:bg-slate-700" />
               </div>
-              <button onClick={handleApplyCrop} className="w-full py-5 bg-fuzzi-blue text-white font-black rounded-2xl shadow-xl hover:scale-[1.02] transition-transform">Salvar Alteração</button>
+              <button onClick={handleApplyCrop} className="w-full py-5 bg-fuzzi-blue text-white font-black rounded-2xl shadow-xl hover:brightness-110 active:scale-[0.98] transition-all">Salvar Alteração</button>
             </div>
           </div>
         </div>
