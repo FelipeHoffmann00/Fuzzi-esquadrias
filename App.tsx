@@ -11,6 +11,7 @@ import CatalogPDFModal from './components/CatalogPDFModal';
 import Footer from './components/Footer';
 import Testimonials from './components/Testimonials';
 import Features from './components/Features';
+import Stats from './components/Stats';
 import ProductDetail from './components/ProductDetail'; 
 import ProductGrid from './components/ProductGrid'; 
 import ConfirmModal from './components/ConfirmModal'; 
@@ -201,7 +202,34 @@ const App: React.FC = () => {
           <Hero theme={theme} setView={setView} heroImage={heroImage} isAdmin={isAdminAuthenticated} onHeroImageChange={handleHeroChange} />
         </section>
 
-        <section id="diferenciais" className="py-12 md:py-24 scroll-mt-24"><Features theme={theme} /></section>
+        {/* SEÇÃO UNIFICADA: DIFERENCIAIS + STATS (HORIZONTAL) */}
+        <section id="diferenciais" className="pt-12 md:pt-24 pb-12 md:pb-24 scroll-mt-24">
+          <div className="container mx-auto px-4">
+            <div className="max-w-7xl mx-auto">
+              {/* Header da Seção com Stats na Direita - Alinhado Verticalmente ao Centro */}
+              <div className="flex flex-col lg:flex-row items-center justify-between mb-16 gap-12 lg:gap-16">
+                <div className="w-full lg:w-1/2">
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-fuzzi-blue/10 text-fuzzi-blue text-[10px] font-black uppercase tracking-[0.2em] mb-4 border border-fuzzi-blue/5 shadow-sm">
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-fuzzi-blue opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-fuzzi-blue"></span>
+                    </span>
+                    Diferenciais
+                  </div>
+                  <h2 className={`text-4xl md:text-5xl font-black leading-tight tracking-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+                    Por que a <span className="text-fuzzi-blue">Fuzzi?</span>
+                  </h2>
+                </div>
+                <div className="w-full lg:w-1/2 lg:pt-8">
+                  <Stats theme={theme} />
+                </div>
+              </div>
+
+              {/* Cards de Diferenciais */}
+              <Features theme={theme} />
+            </div>
+          </div>
+        </section>
         
         <section id="destaques" className="container mx-auto px-4 py-8 md:py-24 scroll-mt-24 overflow-x-hidden">
           <div className="max-w-7xl mx-auto mb-10">
