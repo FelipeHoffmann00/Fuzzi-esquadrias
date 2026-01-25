@@ -6,6 +6,7 @@ import { Theme } from '../types';
 interface StatItemProps {
   icon: React.ElementType;
   value: number;
+  prefix?: string;
   suffix?: string;
   label: string;
   theme: Theme;
@@ -14,7 +15,7 @@ interface StatItemProps {
   textValue?: string;
 }
 
-const StatItem: React.FC<StatItemProps> = ({ icon: Icon, value, suffix = "", label, theme, isLast, isText, textValue }) => {
+const StatItem: React.FC<StatItemProps> = ({ icon: Icon, value, prefix = "", suffix = "", label, theme, isLast, isText, textValue }) => {
   const [count, setCount] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const domRef = useRef<HTMLDivElement>(null);
@@ -63,7 +64,7 @@ const StatItem: React.FC<StatItemProps> = ({ icon: Icon, value, suffix = "", lab
         
         <div className="space-y-0.5">
           <div className={`text-xl md:text-3xl font-black tracking-tighter transition-colors duration-500 ${theme === 'dark' ? 'text-white group-hover:text-fuzzi-blue' : 'text-slate-900 group-hover:text-fuzzi-blue'}`}>
-            {isText ? textValue : `${count}${suffix}`}
+            {isText ? textValue : `${prefix}${count}${suffix}`}
           </div>
           <div className={`text-[7px] md:text-[9px] font-black uppercase tracking-[0.2em] opacity-40 group-hover:opacity-100 transition-opacity duration-500 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
             {label}
@@ -87,10 +88,10 @@ const Stats: React.FC<StatsProps> = ({ theme }) => {
   return (
     <div className="w-full py-4">
       <div className="flex flex-row items-start justify-between md:gap-4">
-        <StatItem theme={theme} icon={Users} value={500} suffix="+" label="Projetos" />
-        <StatItem theme={theme} icon={Award} value={10} suffix=" Anos" label="Mercado" />
+        <StatItem theme={theme} icon={Users} value={500} prefix="+" label="Projetos entregues" />
+        <StatItem theme={theme} icon={Award} value={10} suffix=" Anos" label="no mercado" />
         <StatItem theme={theme} icon={ShieldCheck} value={100} suffix="%" label="Alumínio" />
-        <StatItem theme={theme} icon={MapPin} isText={true} textValue="Sumaré" label="Região" isLast={true} />
+        <StatItem theme={theme} icon={MapPin} isText={true} textValue="Sumaré" label="e região" isLast={true} />
       </div>
     </div>
   );
