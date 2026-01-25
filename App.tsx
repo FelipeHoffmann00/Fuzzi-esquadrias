@@ -169,7 +169,7 @@ const App: React.FC = () => {
   };
 
   const onLoginSuccess = (password: string) => {
-    if (password === '12') { 
+    if (password === '123') { 
       setIsAdminAuthenticated(true);
     }
   };

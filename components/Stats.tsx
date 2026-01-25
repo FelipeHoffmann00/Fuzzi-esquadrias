@@ -5,7 +5,8 @@ import { Theme } from '../types';
 
 interface StatItemProps {
   icon: React.ElementType;
-  value: number;
+  // Made value optional to fix property missing error when isText is true
+  value?: number;
   prefix?: string;
   suffix?: string;
   label: string;
@@ -29,7 +30,8 @@ const StatItem: React.FC<StatItemProps> = ({ icon: Icon, value, prefix = "", suf
   }, []);
 
   useEffect(() => {
-    if (isVisible && !isText) {
+    // Ensure value is defined when not using textValue
+    if (isVisible && !isText && value !== undefined) {
       let start = 0;
       const end = value;
       const increment = end / 125;

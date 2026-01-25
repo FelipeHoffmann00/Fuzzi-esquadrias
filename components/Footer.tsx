@@ -41,7 +41,7 @@ const Footer: React.FC<FooterProps> = ({ theme, isAdmin, onAdminToggle, onLogin,
 
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === '12') {
+    if (password === '123') {
       onLogin(password);
       setShowPasswordInput(false);
       setPassword('');
@@ -179,7 +179,7 @@ const Footer: React.FC<FooterProps> = ({ theme, isAdmin, onAdminToggle, onLogin,
                           autoFocus
                           className={`w-32 px-3 py-2 text-xs rounded-xl border outline-none transition-all ${
                             error 
-                              ? 'border-red-500 bg-red-50/50 ring-4 ring-red-500/10' 
+                              ? 'border-red-500 bg-red-50/50' 
                               : theme === 'dark' 
                                 ? 'bg-slate-900 border-slate-800 text-white focus:border-fuzzi-blue' 
                                 : 'bg-white border-slate-200 text-slate-900 focus:border-fuzzi-blue shadow-sm'
