@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR" style="scroll-behavior: smooth;">
   <head>
@@ -14,7 +13,7 @@
     <meta property="og:image" content="https://i.imgur.com/QZZKjXf.png" />
     <meta property="twitter:card" content="summary_large_image" />
 
-    <!-- Favicon: Ícone de Janela (Esquadria) em SVG -->
+    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300cfff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='3' width='18' height='18' rx='2' ry='2'></rect><line x1='3' y1='12' x2='21' y2='12'></line><line x1='12' y1='3' x2='12' y2='21'></line></svg>" />
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -47,6 +46,7 @@
         overflow-x: hidden;
         position: relative;
         overscroll-behavior-x: none;
+        background-color: #050a14;
       }
       
       body {
@@ -58,14 +58,6 @@
 
       .transition-theme {
         transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1), color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      .fix-clipping {
-        -webkit-mask-image: -webkit-radial-gradient(white, black);
-        mask-image: -webkit-radial-gradient(white, black);
-        isolation: isolate;
-        backface-visibility: hidden;
-        transform: translateZ(0);
       }
 
       ::-webkit-scrollbar {
@@ -80,20 +72,7 @@
         border: 2px solid transparent;
         background-clip: content-box;
       }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #00cfff44;
-        background-clip: content-box;
-      }
       
-      @keyframes float {
-        0% { transform: translateY(0px); }
-        50% { transform: translateY(-10px); }
-        100% { transform: translateY(0px); }
-      }
-      .float-animation {
-        animation: float 6s ease-in-out infinite;
-      }
-
       #root {
         width: 100%;
         overflow-x: hidden;
@@ -103,13 +82,13 @@
   <script type="importmap">
 {
   "imports": {
-    "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
-    "react/": "https://esm.sh/react@^19.2.3/",
     "react": "https://esm.sh/react@^19.2.3",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
+    "vite": "https://esm.sh/vite@^7.3.1",
     "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
-    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.91.1",
-    "vite": "https://esm.sh/vite@^7.3.1"
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.91.1"
   }
 }
 </script>

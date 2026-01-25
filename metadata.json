@@ -1,7 +1,5 @@
 {
   "name": "Fuzzi Esquadrias - Vitrine Premium",
-  "description": "Uma vitrine elegante para produtos de esquadria, com suporte a modo noturno, gerenciamento de catálogo e integração direta com WhatsApp para vendas.",
-  "requestFramePermissions": [
-    "camera"
-  ]
+  "description": "Vitrine de produtos de alto padrão para Fuzzi Esquadrias. Design moderno, catálogo integrado e contato direto via WhatsApp.",
+  "requestFramePermissions": []
 }
