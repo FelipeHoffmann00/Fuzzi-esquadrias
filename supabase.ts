@@ -1,5 +1,5 @@
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = 'https://ircgwoyhvpnepvokswvo.supabase.co';
 const supabaseAnonKey = 'sb_publishable_ug05TQnCpUManpwRLIq58A_vcI51ZUX';
@@ -72,5 +72,4 @@ export const uploadFile = async (
   }
 };
 
-// Mantendo compatibilidade de nome se necessário em outros arquivos
 export const uploadImage = uploadFile;
