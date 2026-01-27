@@ -41,7 +41,7 @@ const Footer: React.FC<FooterProps> = ({ theme, isAdmin, onAdminToggle, onLogin,
 
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === '123') {
+    if (password === 'admfuzzi1452') {
       onLogin(password);
       setShowPasswordInput(false);
       setPassword('');
