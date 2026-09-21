@@ -103,7 +103,7 @@ const Hero: React.FC<HeroProps> = ({ theme, setView, heroImage, isAdmin, onHeroI
         </h1>
         
         <p className={`text-base md:text-2xl mb-1 lg:mb-8 max-w-2xl opacity-60 leading-relaxed font-medium text-left`}>
-          Soluções sob medida em alumínio para transformar seu ambiente com durabilidade e estética refinada.
+          Esquadrias de alumínio sob medida em Sumaré e região: janelas, portas de correr e portões para transformar seu ambiente com durabilidade e estética refinada.
         </p>
       </div>
 
@@ -118,7 +118,8 @@ const Hero: React.FC<HeroProps> = ({ theme, setView, heroImage, isAdmin, onHeroI
             key={heroImage.substring(0, 100)} 
             src={heroImage} 
             className="w-full aspect-[1.3/1] md:aspect-[1.5/1] object-cover transition-transform duration-1000 ease-out md:group-hover:scale-110"
-            alt="Fuzzi Esquadrias de Alumínio"
+            alt="Esquadrias de alumínio de alto padrão da Fuzzi Esquadrias em Sumaré"
+            fetchPriority="high"
           />
 
           <div className={`absolute inset-0 bg-gradient-to-t pointer-events-none transition-opacity duration-700 opacity-0 group-hover:opacity-100 ${

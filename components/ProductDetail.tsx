@@ -104,7 +104,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, theme, onClose }
           <div className="flex h-full items-center transition-transform duration-500 ease-out" style={{ transform: `translateX(-${activeImage * 100}%)` }}>
             {images.map((img, index) => (
               <div key={index} className="w-full h-full flex-shrink-0 flex items-center justify-center p-0 relative">
-                <img src={img} className="w-full h-full object-cover select-none pointer-events-none" draggable={false} />
+                <img src={img} alt={`${product.name} - foto ${index + 1}`} className="w-full h-full object-cover select-none pointer-events-none" draggable={false} />
               </div>
             ))}
           </div>

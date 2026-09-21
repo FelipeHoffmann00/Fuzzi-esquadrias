@@ -283,18 +283,18 @@ const App: React.FC = () => {
                     </p>
                   </div>
                   <div className="flex flex-col sm:flex-row gap-4 items-start">
-                    <a href={mainCatalog?.pdfUrl} target="_blank" className="group w-full sm:w-fit flex items-center justify-center gap-3 px-8 py-4 bg-fuzzi-blue text-white font-black rounded-2xl shadow-xl shadow-fuzzi-blue/20 hover:scale-105 transition-all active:scale-95 text-xs md:text-sm uppercase tracking-wider whitespace-nowrap">
+                    <a href={mainCatalog?.pdfUrl} target="_blank" rel="noopener noreferrer" className="group w-full sm:w-fit flex items-center justify-center gap-3 px-8 py-4 bg-fuzzi-blue text-white font-black rounded-2xl shadow-xl shadow-fuzzi-blue/20 hover:scale-105 transition-all active:scale-95 text-xs md:text-sm uppercase tracking-wider whitespace-nowrap">
                       Veja nosso catálogo
                       <ArrowRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
                     </a>
-                    <a href={whatsappUrl} target="_blank" className="flex w-full sm:w-fit items-center justify-center gap-3 px-8 py-4 bg-[#25D366] text-white font-black rounded-2xl shadow-xl shadow-[#25D366]/20 hover:scale-105 transition-all active:scale-95 text-xs md:text-sm uppercase tracking-wider whitespace-nowrap">
+                    <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="flex w-full sm:w-fit items-center justify-center gap-3 px-8 py-4 bg-[#25D366] text-white font-black rounded-2xl shadow-xl shadow-[#25D366]/20 hover:scale-105 transition-all active:scale-95 text-xs md:text-sm uppercase tracking-wider whitespace-nowrap">
                       <WhatsAppIcon className="w-4 h-4 md:w-5 md:h-5 fill-white" />
                       Fale com um vendedor
                     </a>
                   </div>
                 </div>
                 <div className="absolute lg:relative inset-0 lg:inset-auto w-full h-full lg:min-h-full z-0 overflow-hidden">
-                  <img src={mainCatalog?.coverImage || DEFAULT_HERO_IMAGE} className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 hover:scale-110" alt="Capa do Catálogo" />
+                  <img src={mainCatalog?.coverImage || DEFAULT_HERO_IMAGE} className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 hover:scale-110" alt="Capa do catálogo de esquadrias de alumínio da Fuzzi" loading="lazy" />
                   <div className={`absolute inset-0 ${theme === 'dark' ? 'bg-gradient-to-r from-slate-900 via-slate-900/60 to-transparent' : 'bg-gradient-to-r from-slate-50 via-slate-50/60 to-transparent'} lg:block hidden`}></div>
                   <div className={`absolute inset-0 ${theme === 'dark' ? 'bg-slate-900/80' : 'bg-slate-50/80'} lg:hidden block`}></div>
                 </div>
