@@ -1,0 +1,15 @@
+name: Manter Supabase ativo
+
+on:
+  schedule:
+    - cron: '0 12 */3 * *'
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Chamar a API do Supabase para evitar a pausa por inatividade
+        run: |
+          curl -sf "https://ircgwoyhvpnepvokswvo.supabase.co/rest/v1/products?select=id&limit=1" \
+            -H "apikey: sb_publishable_ug05TQnCpUManpwRLIq58A_vcI51ZUX"
