@@ -48,21 +48,24 @@ const App: React.FC = () => {
 
   const fetchData = useCallback(async () => {
     try {
-      const { data: prods } = await supabase.from('products').select('*').order('created_at', { ascending: false });
-      if (prods && prods.length > 0) setProducts(prods);
-      else setProducts(INITIAL_PRODUCTS);
+      const [prodsRes, testsRes, configRes] = await Promise.allSettled([
+        supabase.from('products').select('*').order('created_at', { ascending: false }),
+        supabase.from('testimonials').select('*').order('created_at', { ascending: false }),
+        supabase.from('site_config').select('*')
+      ]);
 
-      const { data: tests } = await supabase.from('testimonials').select('*').order('created_at', { ascending: false });
-      if (tests && tests.length > 0) setTestimonials(tests);
-      else setTestimonials(INITIAL_TESTIMONIALS);
+      const prods = prodsRes.status === 'fulfilled' ? prodsRes.value.data : null;
+      const tests = testsRes.status === 'fulfilled' ? testsRes.value.data : null;
+      const config = configRes.status === 'fulfilled' ? configRes.value.data : null;
 
-      const { data: config } = await supabase.from('site_config').select('*');
+      setProducts(prods && prods.length > 0 ? prods : INITIAL_PRODUCTS);
+      setTestimonials(tests && tests.length > 0 ? tests : INITIAL_TESTIMONIALS);
+
       const heroCfg = config?.find(c => c.key === 'hero_image');
       const pdfCfg = config?.find(c => c.key === 'catalog');
 
       if (heroCfg) setHeroImage(heroCfg.value.url);
-      if (pdfCfg) setPdfCatalogs([pdfCfg.value]);
-      else setPdfCatalogs(INITIAL_PDF_CATALOGS);
+      setPdfCatalogs(pdfCfg ? [pdfCfg.value] : INITIAL_PDF_CATALOGS);
 
     } catch (e) {
       console.error("Erro ao carregar dados:", e);
